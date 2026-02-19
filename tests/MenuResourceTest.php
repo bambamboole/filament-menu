@@ -76,15 +76,14 @@ it('can update menu name and slug', function () {
         ->slug->toBe('new-name');
 });
 
-it('can add a menu item', function () {
+it('can add a custom menu item', function () {
     $menu = Menu::factory()->create();
 
     livewire(EditMenu::class, ['record' => $menu->id])
-        ->set('menuItemData.label', 'Home')
-        ->set('menuItemData.url', 'https://example.com')
-        ->set('menuItemData.target', '_self')
-        ->set('menuItemData.type', 'link')
-        ->call('addMenuItem');
+        ->set('customItemData.label', 'Home')
+        ->set('customItemData.url', 'https://example.com')
+        ->set('customItemData.target', '_self')
+        ->call('addCustomItem');
 
     $this->assertDatabaseHas('menu_items', [
         'menu_id' => $menu->id,
@@ -93,16 +92,61 @@ it('can add a menu item', function () {
     ]);
 });
 
-it('can edit a menu item', function () {
+it('can edit a custom menu item', function () {
     $menu = Menu::factory()->create();
-    $item = MenuItem::factory()->create(['menu_id' => $menu->id, 'label' => 'Old Label']);
+    $item = MenuItem::factory()->create(['menu_id' => $menu->id, 'label' => 'Old Label', 'url' => '/old']);
 
     livewire(EditMenu::class, ['record' => $menu->id])
         ->call('editItem', $item->id)
         ->assertSet('editingItemId', $item->id)
-        ->assertSet('menuItemData.label', 'Old Label')
-        ->set('menuItemData.label', 'New Label')
-        ->call('addMenuItem');
+        ->assertSet('editingForm', 'custom')
+        ->assertSet('customItemData.label', 'Old Label')
+        ->set('customItemData.label', 'New Label')
+        ->call('addCustomItem');
+
+    expect($item->refresh()->label)->toBe('New Label');
+});
+
+it('can add a linked menu item', function () {
+    $menu = Menu::factory()->create();
+    $page = \Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::forceCreate(['title' => 'About', 'slug' => 'about']);
+
+    $key = str_replace('\\', '_', strtolower(\Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::class));
+
+    livewire(EditMenu::class, ['record' => $menu->id])
+        ->set("linkableData.{$key}.linkable_id", $page->id)
+        ->set("linkableData.{$key}.label", 'About')
+        ->set("linkableData.{$key}.target", '_self')
+        ->call('addLinkableItem', \Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::class);
+
+    $this->assertDatabaseHas('menu_items', [
+        'menu_id' => $menu->id,
+        'label' => 'About',
+        'linkable_type' => \Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::class,
+        'linkable_id' => $page->id,
+    ]);
+});
+
+it('can edit a linked menu item', function () {
+    $menu = Menu::factory()->create();
+    $page = \Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::forceCreate(['title' => 'About', 'slug' => 'about']);
+
+    $item = MenuItem::factory()->create([
+        'menu_id' => $menu->id,
+        'label' => 'Old Label',
+        'linkable_type' => \Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::class,
+        'linkable_id' => $page->id,
+    ]);
+
+    $key = str_replace('\\', '_', strtolower(\Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::class));
+
+    livewire(EditMenu::class, ['record' => $menu->id])
+        ->call('editItem', $item->id)
+        ->assertSet('editingItemId', $item->id)
+        ->assertSet('editingForm', $key)
+        ->assertSet("linkableData.{$key}.label", 'Old Label')
+        ->set("linkableData.{$key}.label", 'New Label')
+        ->call('addLinkableItem', \Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage::class);
 
     expect($item->refresh()->label)->toBe('New Label');
 });
@@ -150,14 +194,15 @@ it('can nest items via reorder', function () {
 
 it('can cancel editing', function () {
     $menu = Menu::factory()->create();
-    $item = MenuItem::factory()->create(['menu_id' => $menu->id]);
+    $item = MenuItem::factory()->create(['menu_id' => $menu->id, 'url' => '/test']);
 
     livewire(EditMenu::class, ['record' => $menu->id])
         ->call('editItem', $item->id)
         ->assertSet('editingItemId', $item->id)
         ->call('cancelEdit')
         ->assertSet('editingItemId', null)
-        ->assertSet('menuItemData.label', '');
+        ->assertSet('editingForm', '')
+        ->assertSet('customItemData.label', '');
 });
 
 it('can delete menu from edit page', function () {

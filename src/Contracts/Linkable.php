@@ -6,5 +6,5 @@ interface Linkable
 {
     public static function getNameColumn(): string;
 
-    public function getUrl(): string;
+    public function getLink(): string;
 }

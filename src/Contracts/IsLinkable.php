@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 /** @mixin \Illuminate\Database\Eloquent\Model */
-trait HasLinkable
+trait IsLinkable
 {
     public static function getLinkableLabel(): string
     {
@@ -24,7 +24,7 @@ trait HasLinkable
         return 'name';
     }
 
-    public function getUrl(): string
+    public function getLink(): string
     {
         return $this->url;
     }

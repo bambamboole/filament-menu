@@ -42,7 +42,7 @@ class MenuItem extends Model
     public function getUrl(): ?string
     {
         if ($this->linkable instanceof Linkable) {
-            return $this->linkable->getUrl();
+            return $this->linkable->getLink();
         }
 
         return $this->url;

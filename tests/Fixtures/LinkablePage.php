@@ -2,13 +2,13 @@
 
 namespace Bambamboole\FilamentMenu\Tests\Fixtures;
 
-use Bambamboole\FilamentMenu\Contracts\HasLinkable;
+use Bambamboole\FilamentMenu\Contracts\IsLinkable;
 use Bambamboole\FilamentMenu\Contracts\Linkable;
 use Illuminate\Database\Eloquent\Model;
 
 class LinkablePage extends Model implements Linkable
 {
-    use HasLinkable;
+    use IsLinkable;
 
     protected $table = 'pages';
 
@@ -19,7 +19,7 @@ class LinkablePage extends Model implements Linkable
         return 'title';
     }
 
-    public function getUrl(): string
+    public function getLink(): string
     {
         return '/pages/' . $this->slug;
     }

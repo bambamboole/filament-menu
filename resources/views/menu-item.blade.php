@@ -9,8 +9,8 @@
             </div>
             <div class="ml-2 flex items-center gap-2">
                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $item->label }}</span>
-                @if($item->url)
-                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $item->url }}</span>
+                @if($item->getUrl())
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $item->getUrl() }}</span>
                 @endif
             </div>
         </div>
@@ -33,7 +33,7 @@
     </div>
 
     <div
-        class="nested ml-6"
+        class="nested" style="margin-left: 1.5rem"
         data-id="{{ $item->id }}"
         x-data="{
             init() {
