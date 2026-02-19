@@ -45,7 +45,7 @@ const defaultOptions = {
 
 compile({
     ...defaultOptions,
-    entryPoints: ['./resources/js/index.js'],
+    entryPoints: ['./resources/js/components/menu-tree.js'],
     outfile: './resources/dist/filament-menu.js',
 }).then(() => {
     console.log(`Build completed for filament-menu.js`)
