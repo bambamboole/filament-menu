@@ -5,7 +5,7 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/bambamboole/filament-menu/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/bambamboole/filament-menu/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/bambamboole/filament-menu.svg?style=flat-square)](https://packagist.org/packages/bambamboole/filament-menu)
 
-A powerful menu builder plugin for Filament that lets you create and manage navigation menus directly from your admin panel. Build unlimited nested menus, link to your Eloquent models, and render them anywhere in your Laravel application with simple Blade components.
+A powerful menu builder plugin for Filament that lets you create and manage navigation menus directly from your admin panel. Build unlimited nested menus, link to your Eloquent models, and render them anywhere in your Laravel application.
 
 ## Features
 
@@ -124,7 +124,7 @@ FilamentMenuPlugin::make()
         \App\Models\Page::class,
         \App\Models\Post::class,
         \App\Models\Category::class,
-    ])
+    ]);
 ```
 
 ### Accessing Menus Programmatically
