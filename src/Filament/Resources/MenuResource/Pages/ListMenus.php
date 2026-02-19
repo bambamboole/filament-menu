@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 namespace Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages;
 
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;

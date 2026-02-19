@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 use Bambamboole\FilamentMenu\Models\Menu;
 use Bambamboole\FilamentMenu\Models\MenuItem;

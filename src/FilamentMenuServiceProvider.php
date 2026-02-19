@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 namespace Bambamboole\FilamentMenu;
 
 use Filament\Support\Assets\Js;

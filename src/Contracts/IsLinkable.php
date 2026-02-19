@@ -1,18 +1,12 @@
 <?php
-
+declare(strict_types=1);
 namespace Bambamboole\FilamentMenu\Contracts;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 
 /** @mixin \Illuminate\Database\Eloquent\Model */
 trait IsLinkable
 {
-    public static function getLinkableLabel(): string
-    {
-        return Str::headline(class_basename(static::class));
-    }
-
     /** @return Builder<static> */
     public static function getLinkableQuery(): Builder
     {

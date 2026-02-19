@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages\EditMenu;
