@@ -3,6 +3,7 @@
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages\EditMenu;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages\ListMenus;
+use Bambamboole\FilamentMenu\FilamentMenuPlugin;
 use Bambamboole\FilamentMenu\Models\Menu;
 use Bambamboole\FilamentMenu\Models\MenuItem;
 use Bambamboole\FilamentMenu\Tests\Fixtures\TestUser;
@@ -166,4 +167,18 @@ it('can delete menu from edit page', function () {
         ->callAction('delete');
 
     $this->assertDatabaseMissing('menus', ['id' => $menu->id]);
+});
+
+it('denies access when canAccess callback returns false', function () {
+    FilamentMenuPlugin::get()->canAccess(fn () => false);
+
+    $this->get(MenuResource::getUrl('index'))
+        ->assertForbidden();
+});
+
+it('allows access when canAccess callback returns true', function () {
+    FilamentMenuPlugin::get()->canAccess(fn () => true);
+
+    $this->get(MenuResource::getUrl('index'))
+        ->assertSuccessful();
 });

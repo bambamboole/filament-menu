@@ -3,6 +3,7 @@
 namespace Bambamboole\FilamentMenu;
 
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
+use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
@@ -10,6 +11,8 @@ class FilamentMenuPlugin implements Plugin
 {
     /** @var array<int, string> */
     protected array $locations = [];
+
+    protected ?Closure $canAccess = null;
 
     public function getId(): string
     {
@@ -44,6 +47,22 @@ class FilamentMenuPlugin implements Plugin
     public function getLocations(): array
     {
         return $this->locations;
+    }
+
+    public function canAccess(Closure $callback): static
+    {
+        $this->canAccess = $callback;
+
+        return $this;
+    }
+
+    public function isAuthorized(): bool
+    {
+        if ($this->canAccess === null) {
+            return true;
+        }
+
+        return ($this->canAccess)();
     }
 
     public static function make(): static

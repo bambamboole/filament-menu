@@ -7,6 +7,7 @@ use Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages\EditMenu;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages\ListMenus;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Schemas\MenuForm;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Tables\MenusTable;
+use Bambamboole\FilamentMenu\FilamentMenuPlugin;
 use Bambamboole\FilamentMenu\Models\Menu;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -18,6 +19,11 @@ class MenuResource extends Resource
     protected static ?string $model = Menu::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBars3;
+
+    public static function canAccess(): bool
+    {
+        return FilamentMenuPlugin::get()->isAuthorized();
+    }
 
     public static function getNavigationGroup(): ?string
     {
