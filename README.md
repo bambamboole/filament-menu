@@ -1,62 +1,100 @@
-# Create menus with ease in Filament
+# Filament Menu
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/bambamboole/filament-menu.svg?style=flat-square)](https://packagist.org/packages/bambamboole/filament-menu)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/bambamboole/filament-menu/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/bambamboole/filament-menu/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/bambamboole/filament-menu/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/bambamboole/filament-menu/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/bambamboole/filament-menu.svg?style=flat-square)](https://packagist.org/packages/bambamboole/filament-menu)
 
-
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+A menu builder plugin for [Filament](https://filamentphp.com) that lets you create and manage navigation menus with
+drag-and-drop ordering, nesting, and linkable Eloquent models.
 
 ## Installation
-
-You can install the package via composer:
 
 ```bash
 composer require bambamboole/filament-menu
 ```
 
-> [!IMPORTANT]
-> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
-
-After setting up a custom theme add the plugin's views to your theme css file or your app's css file if using the standalone packages.
+Add the plugin views to your custom theme's CSS file:
 
 ```css
 @source '../../../../vendor/bambamboole/filament-menu/resources/**/*.blade.php';
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="filament-menu-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="filament-menu-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="filament-menu-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
 ## Usage
 
+Register the plugin in your panel provider:
+
 ```php
-$filamentMenu = new Bambamboole\FilamentMenu();
-echo $filamentMenu->echoPhrase('Hello, Bambamboole!');
+use Bambamboole\FilamentMenu\FilamentMenuPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->plugins([
+            FilamentMenuPlugin::make()
+                ->locations(['header', 'footer', 'sidebar'])
+                ->linkables([Page::class, Post::class])
+                ->canAccess(fn () => auth()->user()->isAdmin())
+                ->cacheFor(3600),
+        ]);
+}
+```
+
+| Method               | Description                                                       |
+|----------------------|-------------------------------------------------------------------|
+| `locations(array)`   | Named positions where menus can be assigned (e.g. header, footer) |
+| `linkables(array)`   | Eloquent models that can be linked as menu items                  |
+| `canAccess(Closure)` | Controls who can manage menus                                     |
+| `cacheFor(int)`      | Cache duration in seconds (auto-invalidated on changes)           |
+
+## Linkable Models
+
+To let editors link menu items to your Eloquent models, implement the `Linkable` interface:
+
+```php
+use Bambamboole\FilamentMenu\Contracts\Linkable;
+use Bambamboole\FilamentMenu\Concerns\IsLinkable;
+use Illuminate\Database\Eloquent\Builder;
+
+class Page extends Model implements Linkable
+{
+    use IsLinkable;
+
+    public static function getLinkableQuery(): Builder
+    {
+        return static::query()->where('published', true);
+    }
+
+    public static function getNameColumn(): string
+    {
+        return 'title';
+    }
+
+    public function getLink(): string
+    {
+        return route('pages.show', $this->slug);
+    }
+}
+```
+
+The `IsLinkable` trait provides sensible defaults — override only what you need.
+
+## Rendering Menus
+
+Use the Blade component in your templates:
+
+```blade
+<x-filament-menu::menu location="header" />
+
+<x-filament-menu::menu slug="main-navigation" />
+```
+
+Or retrieve menus programmatically:
+
+```php
+use Bambamboole\FilamentMenu\Models\Menu;
+
+$menu = Menu::findByLocation('header');
+$tree = $menu->getTree(); // array of nested items
 ```
 
 ## Testing
