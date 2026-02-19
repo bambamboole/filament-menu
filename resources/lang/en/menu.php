@@ -22,7 +22,7 @@ return [
     'edit.item.target_blank' => 'New Window',
     'edit.item.type' => 'Type',
     'edit.item.type_link' => 'Link',
-    'edit.item.type_page' => 'Page',
+    'edit.item.record' => 'Record',
     'edit.item.button_add' => 'Add Item',
     'edit.item.button_update' => 'Update Item',
     'edit.item.button_cancel' => 'Cancel',

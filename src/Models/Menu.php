@@ -45,7 +45,7 @@ class Menu extends Model
      */
     public function getTree(): array
     {
-        $items = $this->items()->get();
+        $items = $this->items()->with('linkable')->get();
         $grouped = $items->groupBy('parent_id');
 
         return $this->buildTree($grouped, null);
@@ -63,7 +63,7 @@ class Menu extends Model
             $branch[] = [
                 'id' => $item->id,
                 'label' => $item->label,
-                'url' => $item->url,
+                'url' => $item->getUrl(),
                 'target' => $item->target,
                 'type' => $item->type,
                 'children' => $this->buildTree($grouped, $item->id),

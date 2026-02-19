@@ -3,6 +3,7 @@
 use Bambamboole\FilamentMenu\Models\Menu;
 use Bambamboole\FilamentMenu\Models\MenuItem;
 use Bambamboole\FilamentMenu\Models\MenuLocation;
+use Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage;
 
 it('auto-generates slug from name on creation', function () {
     $menu = Menu::create(['name' => 'Main Navigation']);
@@ -70,4 +71,41 @@ it('can assign a location to a menu', function () {
 
     expect($menu->locations)->toHaveCount(1)
         ->and($menu->locations->first()->location)->toBe('footer');
+});
+
+it('resolves url from linkable model', function () {
+    $page = LinkablePage::forceCreate(['title' => 'About', 'slug' => 'about']);
+    $menu = Menu::factory()->create();
+
+    $item = MenuItem::factory()->create([
+        'menu_id' => $menu->id,
+        'linkable_type' => LinkablePage::class,
+        'linkable_id' => $page->id,
+        'url' => null,
+    ]);
+
+    expect($item->getUrl())->toBe('/pages/about');
+});
+
+it('falls back to url when no linkable is set', function () {
+    $item = MenuItem::factory()->create(['url' => 'https://example.com']);
+
+    expect($item->getUrl())->toBe('https://example.com');
+});
+
+it('resolves linkable urls in tree', function () {
+    $page = LinkablePage::forceCreate(['title' => 'About', 'slug' => 'about']);
+    $menu = Menu::factory()->create();
+
+    MenuItem::factory()->create([
+        'menu_id' => $menu->id,
+        'linkable_type' => LinkablePage::class,
+        'linkable_id' => $page->id,
+        'url' => null,
+        'sort_order' => 0,
+    ]);
+
+    $tree = $menu->getTree();
+
+    expect($tree[0]['url'])->toBe('/pages/about');
 });

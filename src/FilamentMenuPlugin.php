@@ -2,6 +2,7 @@
 
 namespace Bambamboole\FilamentMenu;
 
+use Bambamboole\FilamentMenu\Contracts\Linkable;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
 use Closure;
 use Filament\Contracts\Plugin;
@@ -11,6 +12,9 @@ class FilamentMenuPlugin implements Plugin
 {
     /** @var array<int, string> */
     protected array $locations = [];
+
+    /** @var array<int, class-string<Linkable>> */
+    protected array $linkables = [];
 
     protected ?Closure $canAccess = null;
 
@@ -47,6 +51,24 @@ class FilamentMenuPlugin implements Plugin
     public function getLocations(): array
     {
         return $this->locations;
+    }
+
+    /**
+     * @param  array<int, class-string<Linkable>>  $linkables
+     */
+    public function linkables(array $linkables): static
+    {
+        $this->linkables = $linkables;
+
+        return $this;
+    }
+
+    /**
+     * @return array<int, class-string<Linkable>>
+     */
+    public function getLinkables(): array
+    {
+        return $this->linkables;
     }
 
     public function canAccess(Closure $callback): static

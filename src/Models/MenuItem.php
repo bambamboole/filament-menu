@@ -2,10 +2,12 @@
 
 namespace Bambamboole\FilamentMenu\Models;
 
+use Bambamboole\FilamentMenu\Contracts\Linkable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MenuItem extends Model
 {
@@ -29,5 +31,20 @@ class MenuItem extends Model
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order');
+    }
+
+    /** @return MorphTo<Model&Linkable, $this> */
+    public function linkable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function getUrl(): ?string
+    {
+        if ($this->linkable instanceof Linkable) {
+            return $this->linkable->getUrl();
+        }
+
+        return $this->url;
     }
 }

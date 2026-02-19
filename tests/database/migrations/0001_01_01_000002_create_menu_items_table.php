@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('target')->nullable();
             $table->string('type')->default('link');
             $table->integer('sort_order')->default(0);
+            $table->nullableMorphs('linkable');
             $table->timestamps();
         });
     }

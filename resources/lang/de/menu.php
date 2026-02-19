@@ -22,7 +22,7 @@ return [
     'edit.item.target_blank' => 'Neues Fenster',
     'edit.item.type' => 'Typ',
     'edit.item.type_link' => 'Link',
-    'edit.item.type_page' => 'Seite',
+    'edit.item.record' => 'Eintrag',
     'edit.item.button_add' => 'Hinzufügen',
     'edit.item.button_update' => 'Aktualisieren',
     'edit.item.button_cancel' => 'Abbrechen',

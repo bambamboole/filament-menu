@@ -17,7 +17,9 @@ class TestPanelProvider extends PanelProvider
             ->path('test')
             ->login()
             ->plugins([
-                FilamentMenuPlugin::make()->locations(['header', 'footer', 'sidebar']),
+                FilamentMenuPlugin::make()
+                    ->locations(['header', 'footer', 'sidebar'])
+                    ->linkables([LinkablePage::class]),
             ])
             ->authMiddleware([
                 Authenticate::class,

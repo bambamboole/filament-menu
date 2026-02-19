@@ -2,6 +2,7 @@
 
 namespace Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages;
 
+use Bambamboole\FilamentMenu\Contracts\Linkable;
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
 use Bambamboole\FilamentMenu\FilamentMenuPlugin;
 use Bambamboole\FilamentMenu\Models\MenuItem;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -24,12 +26,13 @@ class EditMenu extends EditRecord
 {
     protected static string $resource = MenuResource::class;
 
-    /** @var array{label: string, url: string, target: string, type: string} */
+    /** @var array{label: string, url: string, target: string, type: string, linkable_id: ?int} */
     public array $menuItemData = [
         'label' => '',
         'url' => '',
         'target' => '_self',
         'type' => 'link',
+        'linkable_id' => null,
     ];
 
     public ?int $editingItemId = null;
@@ -88,6 +91,14 @@ class EditMenu extends EditRecord
 
     protected function getAddItemSection(): Section
     {
+        $linkables = FilamentMenuPlugin::get()->getLinkables();
+
+        $typeOptions = ['link' => __('filament-menu::menu.edit.item.type_link')];
+
+        foreach ($linkables as $linkable) {
+            $typeOptions[$linkable] = $linkable::getLinkableLabel();
+        }
+
         return Section::make(fn (): string => $this->editingItemId
                 ? __('filament-menu::menu.edit.item.title_edit')
                 : __('filament-menu::menu.edit.item.title_add'))
@@ -96,9 +107,41 @@ class EditMenu extends EditRecord
                     ->label(__('filament-menu::menu.edit.item.label'))
                     ->required(),
 
+                Select::make('menuItemData.type')
+                    ->label(__('filament-menu::menu.edit.item.type'))
+                    ->options($typeOptions)
+                    ->default('link')
+                    ->live(),
+
                 TextInput::make('menuItemData.url')
                     ->label(__('filament-menu::menu.edit.item.url'))
-                    ->url(),
+                    ->url()
+                    ->visible(fn (Get $get): bool => $get('menuItemData.type') === 'link'),
+
+                Select::make('menuItemData.linkable_id')
+                    ->label(__('filament-menu::menu.edit.item.record'))
+                    ->searchable()
+                    ->getSearchResultsUsing(function (string $search, Get $get): array {
+                        $type = $get('menuItemData.type');
+
+                        if ($type === 'link' || ! is_a($type, Linkable::class, true)) {
+                            return [];
+                        }
+
+                        return $type::getLinkableSearchResults($search);
+                    })
+                    ->getOptionLabelUsing(function ($value, Get $get): ?string {
+                        $type = $get('menuItemData.type');
+
+                        if (! is_a($type, Linkable::class, true)) {
+                            return null;
+                        }
+
+                        $results = $type::getLinkableSearchResults('');
+
+                        return $results[$value] ?? null;
+                    })
+                    ->visible(fn (Get $get): bool => $get('menuItemData.type') !== 'link'),
 
                 Select::make('menuItemData.target')
                     ->label(__('filament-menu::menu.edit.item.target'))
@@ -107,14 +150,6 @@ class EditMenu extends EditRecord
                         '_blank' => __('filament-menu::menu.edit.item.target_blank'),
                     ])
                     ->default('_self'),
-
-                Select::make('menuItemData.type')
-                    ->label(__('filament-menu::menu.edit.item.type'))
-                    ->options([
-                        'link' => __('filament-menu::menu.edit.item.type_link'),
-                        'page' => __('filament-menu::menu.edit.item.type_page'),
-                    ])
-                    ->default('link'),
 
                 \Filament\Schemas\Components\Actions::make([
                     Action::make('addMenuItem')
@@ -142,11 +177,15 @@ class EditMenu extends EditRecord
 
     public function addMenuItem(): void
     {
+        $linkables = FilamentMenuPlugin::get()->getLinkables();
+        $validTypes = implode(',', ['link', ...$linkables]);
+
         $validator = Validator::make($this->menuItemData, [
             'label' => 'required|string|max:255',
             'url' => 'nullable|string|max:255',
             'target' => 'nullable|string|in:_self,_blank',
-            'type' => 'required|string|in:link,page',
+            'type' => "required|string|in:{$validTypes}",
+            'linkable_id' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -159,17 +198,28 @@ class EditMenu extends EditRecord
 
         $data = $validator->validated();
 
+        $isLinkable = $data['type'] !== 'link' && in_array($data['type'], $linkables);
+
+        $attributes = [
+            'label' => $data['label'],
+            'target' => $data['target'],
+            'type' => $data['type'],
+            'url' => $isLinkable ? null : $data['url'],
+            'linkable_type' => $isLinkable ? $data['type'] : null,
+            'linkable_id' => $isLinkable ? $data['linkable_id'] : null,
+        ];
+
         if ($this->editingItemId) {
             $item = MenuItem::find($this->editingItemId);
 
             if ($item) {
-                $item->update($data);
+                $item->update($attributes);
             }
         } else {
             $maxSort = $this->record->rootItems()->max('sort_order') ?? -1;
 
             $this->record->items()->create([
-                ...$data,
+                ...$attributes,
                 'sort_order' => $maxSort + 1,
             ]);
         }
@@ -190,7 +240,8 @@ class EditMenu extends EditRecord
             'label' => $item->label,
             'url' => $item->url ?? '',
             'target' => $item->target ?? '_self',
-            'type' => $item->type,
+            'type' => $item->linkable_type ?? 'link',
+            'linkable_id' => $item->linkable_id,
         ];
     }
 
@@ -232,6 +283,7 @@ class EditMenu extends EditRecord
             'url' => '',
             'target' => '_self',
             'type' => 'link',
+            'linkable_id' => null,
         ];
     }
 
