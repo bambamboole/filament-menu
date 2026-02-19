@@ -10,12 +10,6 @@ use Filament\Panel;
 
 class FilamentMenuPlugin implements Plugin
 {
-    /** @var array<int, string> */
-    protected array $locations = [];
-
-    /** @var array<int, class-string<Linkable>> */
-    protected array $linkables = [];
-
     protected ?Closure $canAccess = null;
 
     protected ?int $cacheTtl = null;
@@ -37,40 +31,21 @@ class FilamentMenuPlugin implements Plugin
         //
     }
 
-    /**
-     * @param  array<int, string>  $locations
-     */
-    public function locations(array $locations): static
+    public function location(string $key, string $label): static
     {
-        $this->locations = $locations;
+        app(FilamentMenu::class)->location($key, $label);
 
         return $this;
     }
 
     /**
-     * @return array<int, string>
+     * @param  class-string<Linkable>  $class
      */
-    public function getLocations(): array
+    public function linkable(string $class, ?string $label = null): static
     {
-        return $this->locations;
-    }
-
-    /**
-     * @param  array<int, class-string<Linkable>>  $linkables
-     */
-    public function linkables(array $linkables): static
-    {
-        $this->linkables = $linkables;
+        app(FilamentMenu::class)->linkable($class, $label);
 
         return $this;
-    }
-
-    /**
-     * @return array<int, class-string<Linkable>>
-     */
-    public function getLinkables(): array
-    {
-        return $this->linkables;
     }
 
     public function canAccess(Closure $callback): static

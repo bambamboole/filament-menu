@@ -2,11 +2,52 @@
 declare(strict_types=1);
 namespace Bambamboole\FilamentMenu;
 
+use Bambamboole\FilamentMenu\Contracts\Linkable;
 use Bambamboole\FilamentMenu\Models\Menu;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class FilamentMenu
 {
+    /** @var array<string, string> */
+    protected array $locations = [];
+
+    /** @var array<class-string<Linkable>, string> */
+    protected array $linkables = [];
+
+    public function location(string $key, string $label): static
+    {
+        $this->locations[$key] = $label;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getLocations(): array
+    {
+        return $this->locations;
+    }
+
+    /**
+     * @param  class-string<Linkable>  $class
+     */
+    public function linkable(string $class, ?string $label = null): static
+    {
+        $this->linkables[$class] = $label ?? Str::headline(class_basename($class));
+
+        return $this;
+    }
+
+    /**
+     * @return array<class-string<Linkable>, string>
+     */
+    public function getLinkables(): array
+    {
+        return $this->linkables;
+    }
+
     public function getByLocation(string $location): ?Menu
     {
         $seconds = $this->getCacheTtl();
@@ -37,7 +78,7 @@ class FilamentMenu
         );
     }
 
-    public static function flush(): void
+    public function flush(): void
     {
         Cache::forget('filament-menu:all-keys');
 

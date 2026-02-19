@@ -27,8 +27,8 @@ class Menu extends Model
             }
         });
 
-        static::saved(fn () => FilamentMenu::flush());
-        static::deleted(fn () => FilamentMenu::flush());
+        static::saved(fn () => app(FilamentMenu::class)->flush());
+        static::deleted(fn () => app(FilamentMenu::class)->flush());
     }
 
     public static function findByLocation(string $location): ?self

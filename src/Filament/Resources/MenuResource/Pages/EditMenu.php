@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages;
 
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
-use Bambamboole\FilamentMenu\FilamentMenuPlugin;
+use Bambamboole\FilamentMenu\FilamentMenu;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Hidden;
@@ -16,7 +16,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 /**
  * @property \Bambamboole\FilamentMenu\Models\Menu $record
@@ -42,8 +41,8 @@ class EditMenu extends EditRecord
     {
         $actions = [];
 
-        foreach (FilamentMenuPlugin::get()->getLinkables() as $linkable) {
-            $actions[] = $this->makeAddLinkableAction($linkable);
+        foreach (app(FilamentMenu::class)->getLinkables() as $linkableClass => $linkableLabel) {
+            $actions[] = $this->makeAddLinkableAction($linkableClass, $linkableLabel);
         }
 
         $actions[] = $this->makeAddCustomLinkAction();
@@ -62,10 +61,9 @@ class EditMenu extends EditRecord
             ]);
     }
 
-    private function makeAddLinkableAction(string $linkable): Action
+    private function makeAddLinkableAction(string $linkable, string $label): Action
     {
         $key = self::linkableKey($linkable);
-        $label = Str::headline(class_basename($linkable));
 
         return Action::make("addLinkable_{$key}")
             ->label(__('filament-menu::menu.edit.linked.title_add', ['type' => $label]))
@@ -161,7 +159,7 @@ class EditMenu extends EditRecord
 
     private function makeEditItemAction(): Action
     {
-        $linkables = FilamentMenuPlugin::get()->getLinkables();
+        $linkables = array_keys(app(FilamentMenu::class)->getLinkables());
 
         return Action::make('editItem')
             ->mountUsing(function (Schema $form, array $arguments): void {

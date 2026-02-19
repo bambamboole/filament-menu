@@ -16,8 +16,8 @@ class MenuItem extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => FilamentMenu::flush());
-        static::deleted(fn () => FilamentMenu::flush());
+        static::saved(fn () => app(FilamentMenu::class)->flush());
+        static::deleted(fn () => app(FilamentMenu::class)->flush());
     }
 
     protected $fillable = [

@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace Bambamboole\FilamentMenu\Tests\Fixtures;
 
-use Bambamboole\FilamentMenu\Contracts\IsLinkable;
+use Bambamboole\FilamentMenu\Concerns\IsLinkable;
 use Bambamboole\FilamentMenu\Contracts\Linkable;
 use Illuminate\Database\Eloquent\Model;
 
