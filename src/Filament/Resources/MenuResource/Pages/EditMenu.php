@@ -157,7 +157,7 @@ class EditMenu extends EditRecord
             });
     }
 
-    private function makeEditItemAction(): Action
+    public function editItemAction(): Action
     {
         $linkables = array_keys(app(FilamentMenu::class)->getLinkables());
 
@@ -246,7 +246,7 @@ class EditMenu extends EditRecord
             });
     }
 
-    private function makeDeleteItemAction(): Action
+    public function deleteItemAction(): Action
     {
         return Action::make('deleteItem')
             ->requiresConfirmation()
@@ -268,8 +268,6 @@ class EditMenu extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            $this->makeEditItemAction(),
-            $this->makeDeleteItemAction(),
             DeleteAction::make(),
         ];
     }
