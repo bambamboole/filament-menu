@@ -9,6 +9,8 @@ return [
     'form.name' => 'Name',
     'form.slug' => 'Slug',
 
+    'edit.add_items.title' => 'Add Items',
+
     'edit.location.title' => 'Location',
     'edit.location.label' => 'Menu Location',
     'edit.location.placeholder' => 'No location assigned',

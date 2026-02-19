@@ -6,15 +6,15 @@ use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
 use Bambamboole\FilamentMenu\FilamentMenuPlugin;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Validator;
 
 /**
  * @property \Bambamboole\FilamentMenu\Models\Menu $record
@@ -23,62 +23,52 @@ class EditMenu extends EditRecord
 {
     protected static string $resource = MenuResource::class;
 
-    /** @var array<string, array{linkable_id: ?int, label: string, target: string}> */
-    public array $linkableData = [];
-
-    /** @var array{label: string, url: string, target: string} */
-    public array $customItemData = [
-        'label' => '',
-        'url' => '',
-        'target' => '_self',
-    ];
-
-    public ?int $editingItemId = null;
-
-    public string $editingForm = '';
-
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        $this->initLinkableData();
-    }
-
     public function content(Schema $schema): Schema
     {
-        $linkableSections = [];
-
-        foreach (FilamentMenuPlugin::get()->getLinkables() as $linkable) {
-            $linkableSections[] = $this->getLinkableSection($linkable);
-        }
-
         return $schema
             ->components([
                 $this->getFormContentComponent(),
                 Grid::make(2)
                     ->schema([
-                        Grid::make(1)
-                            ->schema([
-                                ...$linkableSections,
-                                $this->getCustomItemSection(),
-                            ]),
+                        $this->getAddItemsSection(),
                         $this->getTreeSection(),
                     ]),
             ]);
     }
 
-    protected function getLinkableSection(string $linkable): Section
+    protected function getAddItemsSection(): Section
+    {
+        $actions = [];
+
+        foreach (FilamentMenuPlugin::get()->getLinkables() as $linkable) {
+            $actions[] = $this->makeAddLinkableAction($linkable);
+        }
+
+        $actions[] = $this->makeAddCustomLinkAction();
+
+        return Section::make(__('filament-menu::menu.edit.add_items.title'))
+            ->schema([
+                \Filament\Schemas\Components\Actions::make($actions),
+            ]);
+    }
+
+    protected function getTreeSection(): Section
+    {
+        return Section::make(__('filament-menu::menu.edit.structure.title'))
+            ->schema([
+                View::make('filament-menu::menu-tree'),
+            ]);
+    }
+
+    private function makeAddLinkableAction(string $linkable): Action
     {
         $key = self::linkableKey($linkable);
         $label = $linkable::getLinkableLabel();
 
-        return Section::make(fn (): string => $this->editingForm === $key
-                ? __('filament-menu::menu.edit.linked.title_edit', ['type' => $label])
-                : __('filament-menu::menu.edit.linked.title_add', ['type' => $label]))
-            ->collapsible()
-            ->collapsed(fn (): bool => $this->editingForm !== $key)
+        return Action::make("addLinkable_{$key}")
+            ->label(__('filament-menu::menu.edit.linked.title_add', ['type' => $label]))
             ->schema([
-                Select::make("linkableData.{$key}.linkable_id")
+                Select::make('linkable_id')
                     ->label(__('filament-menu::menu.edit.linked.record'))
                     ->searchable()
                     ->required()
@@ -91,7 +81,7 @@ class EditMenu extends EditRecord
                     })
                     ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'))
                     ->live()
-                    ->afterStateUpdated(function (?int $state, Set $set) use ($linkable, $key): void {
+                    ->afterStateUpdated(function (?int $state, callable $set) use ($linkable): void {
                         if ($state === null) {
                             return;
                         }
@@ -99,215 +89,168 @@ class EditMenu extends EditRecord
                         $record = $linkable::find($state);
 
                         if ($record) {
-                            $set("linkableData.{$key}.label", $record->{$linkable::getNameColumn()});
+                            $set('label', $record->{$linkable::getNameColumn()});
                         }
                     }),
 
-                TextInput::make("linkableData.{$key}.label")
+                TextInput::make('label')
                     ->label(__('filament-menu::menu.edit.linked.label'))
-                    ->required(),
+                    ->required()
+                    ->maxLength(255),
 
-                Select::make("linkableData.{$key}.target")
+                Select::make('target')
                     ->label(__('filament-menu::menu.edit.linked.target'))
                     ->options([
                         '_self' => __('filament-menu::menu.edit.item.target_self'),
                         '_blank' => __('filament-menu::menu.edit.item.target_blank'),
                     ])
                     ->default('_self'),
+            ])
+            ->action(function (array $data) use ($linkable): void {
+                $maxSort = $this->record->rootItems()->max('sort_order') ?? -1;
 
-                \Filament\Schemas\Components\Actions::make([
-                    Action::make("addLinkable_{$key}")
-                        ->label(fn (): string => $this->editingForm === $key
-                            ? __('filament-menu::menu.edit.item.button_update')
-                            : __('filament-menu::menu.edit.item.button_add'))
-                        ->action(fn () => $this->addLinkableItem($linkable)),
-
-                    Action::make("cancelLinkable_{$key}")
-                        ->label(__('filament-menu::menu.edit.item.button_cancel'))
-                        ->color('gray')
-                        ->visible(fn (): bool => $this->editingForm === $key)
-                        ->action('cancelEdit'),
-                ]),
-            ]);
+                $this->record->items()->create([
+                    'label' => $data['label'],
+                    'target' => $data['target'],
+                    'type' => $linkable,
+                    'url' => null,
+                    'linkable_type' => $linkable,
+                    'linkable_id' => $data['linkable_id'],
+                    'sort_order' => $maxSort + 1,
+                ]);
+            });
     }
 
-    protected function getCustomItemSection(): Section
+    private function makeAddCustomLinkAction(): Action
     {
-        return Section::make(fn (): string => $this->editingForm === 'custom'
-                ? __('filament-menu::menu.edit.custom.title_edit')
-                : __('filament-menu::menu.edit.custom.title_add'))
-            ->collapsible()
-            ->collapsed(fn (): bool => $this->editingForm !== 'custom')
+        return Action::make('addCustomLink')
+            ->label(__('filament-menu::menu.edit.custom.title_add'))
             ->schema([
-                TextInput::make('customItemData.label')
+                TextInput::make('label')
                     ->label(__('filament-menu::menu.edit.custom.label'))
-                    ->required(),
+                    ->required()
+                    ->maxLength(255),
 
-                TextInput::make('customItemData.url')
+                TextInput::make('url')
                     ->label(__('filament-menu::menu.edit.custom.url'))
-                    ->required(),
+                    ->required()
+                    ->maxLength(255),
 
-                Select::make('customItemData.target')
+                Select::make('target')
                     ->label(__('filament-menu::menu.edit.custom.target'))
                     ->options([
                         '_self' => __('filament-menu::menu.edit.item.target_self'),
                         '_blank' => __('filament-menu::menu.edit.item.target_blank'),
                     ])
                     ->default('_self'),
+            ])
+            ->action(function (array $data): void {
+                $maxSort = $this->record->rootItems()->max('sort_order') ?? -1;
 
-                \Filament\Schemas\Components\Actions::make([
-                    Action::make('addCustomItem')
-                        ->label(fn (): string => $this->editingForm === 'custom'
-                            ? __('filament-menu::menu.edit.item.button_update')
-                            : __('filament-menu::menu.edit.item.button_add'))
-                        ->action('addCustomItem'),
-
-                    Action::make('cancelCustomEdit')
-                        ->label(__('filament-menu::menu.edit.item.button_cancel'))
-                        ->color('gray')
-                        ->visible(fn (): bool => $this->editingForm === 'custom')
-                        ->action('cancelEdit'),
-                ]),
-            ]);
+                $this->record->items()->create([
+                    'label' => $data['label'],
+                    'target' => $data['target'],
+                    'type' => 'link',
+                    'url' => $data['url'],
+                    'linkable_type' => null,
+                    'linkable_id' => null,
+                    'sort_order' => $maxSort + 1,
+                ]);
+            });
     }
 
-    protected function getTreeSection(): Section
+    private function makeEditItemAction(): Action
     {
-        return Section::make(__('filament-menu::menu.edit.structure.title'))
+        $linkables = FilamentMenuPlugin::get()->getLinkables();
+
+        return Action::make('editItem')
+            ->mountUsing(function (Schema $form, array $arguments): void {
+                $item = $this->record->items()->find($arguments['itemId']);
+
+                if (!$item) {
+                    return;
+                }
+
+                $data = [
+                    'label' => $item->label,
+                    'target' => $item->target ?? '_self',
+                    'item_type' => $item->linkable_type ? 'linkable' : 'custom',
+                ];
+
+                if ($item->linkable_type) {
+                    $data['linkable_type'] = $item->linkable_type;
+                    $data['linkable_id'] = $item->linkable_id;
+                } else {
+                    $data['url'] = $item->url ?? '';
+                }
+
+                $form->fill($data);
+            })
             ->schema([
-                View::make('filament-menu::menu-tree'),
-            ]);
+                Hidden::make('item_type'),
+                Hidden::make('linkable_type'),
+
+                ...array_map(fn (string $linkable): Select => Select::make('linkable_id')
+                    ->label(__('filament-menu::menu.edit.linked.record'))
+                    ->searchable()
+                    ->preload()
+                    ->getSearchResultsUsing(fn (string $search): array => $linkable::getLinkableSearchResults($search))
+                    ->getOptionLabelUsing(function ($value) use ($linkable): ?string {
+                        $record = $linkable::find($value);
+
+                        return $record?->{$linkable::getNameColumn()};
+                    })
+                    ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'))
+                    ->visible(fn (Get $get): bool => $get('item_type') === 'linkable' && $get('linkable_type') === $linkable),
+                    $linkables),
+
+                TextInput::make('url')
+                    ->label(__('filament-menu::menu.edit.custom.url'))
+                    ->maxLength(255)
+                    ->visible(fn (Get $get): bool => $get('item_type') === 'custom'),
+
+                TextInput::make('label')
+                    ->label(__('filament-menu::menu.edit.linked.label'))
+                    ->required()
+                    ->maxLength(255),
+
+                Select::make('target')
+                    ->label(__('filament-menu::menu.edit.linked.target'))
+                    ->options([
+                        '_self' => __('filament-menu::menu.edit.item.target_self'),
+                        '_blank' => __('filament-menu::menu.edit.item.target_blank'),
+                    ]),
+            ])
+            ->action(function (array $data, array $arguments): void {
+                $item = $this->record->items()->find($arguments['itemId']);
+
+                if (!$item) {
+                    return;
+                }
+
+                $attributes = [
+                    'label' => $data['label'],
+                    'target' => $data['target'],
+                ];
+
+                if ($data['item_type'] === 'custom') {
+                    $attributes['url'] = $data['url'];
+                } else {
+                    $attributes['linkable_id'] = $data['linkable_id'];
+                }
+
+                $item->update($attributes);
+            });
     }
 
-    public function addLinkableItem(string $linkableType): void
+    private function makeDeleteItemAction(): Action
     {
-        $key = self::linkableKey($linkableType);
-        $data = $this->linkableData[$key] ?? null;
-
-        if (! $data) {
-            return;
-        }
-
-        $validator = Validator::make($data, [
-            'linkable_id' => 'required|integer',
-            'label' => 'required|string|max:255',
-            'target' => 'nullable|string|in:_self,_blank',
-        ]);
-
-        if ($validator->fails()) {
-            foreach ($validator->errors()->all() as $error) {
-                $this->addError("linkableData.{$key}.label", $error);
-            }
-
-            return;
-        }
-
-        $validated = $validator->validated();
-
-        $attributes = [
-            'label' => $validated['label'],
-            'target' => $validated['target'],
-            'type' => $linkableType,
-            'url' => null,
-            'linkable_type' => $linkableType,
-            'linkable_id' => $validated['linkable_id'],
-        ];
-
-        if ($this->editingItemId) {
-            $this->record->items()->where('id', $this->editingItemId)->update($attributes);
-        } else {
-            $maxSort = $this->record->rootItems()->max('sort_order') ?? -1;
-
-            $this->record->items()->create([
-                ...$attributes,
-                'sort_order' => $maxSort + 1,
-            ]);
-        }
-
-        $this->resetItemForm();
-    }
-
-    public function addCustomItem(): void
-    {
-        $validator = Validator::make($this->customItemData, [
-            'label' => 'required|string|max:255',
-            'url' => 'required|string|max:255',
-            'target' => 'nullable|string|in:_self,_blank',
-        ]);
-
-        if ($validator->fails()) {
-            foreach ($validator->errors()->all() as $error) {
-                $this->addError('customItemData.label', $error);
-            }
-
-            return;
-        }
-
-        $data = $validator->validated();
-
-        $attributes = [
-            'label' => $data['label'],
-            'target' => $data['target'],
-            'type' => 'link',
-            'url' => $data['url'],
-            'linkable_type' => null,
-            'linkable_id' => null,
-        ];
-
-        if ($this->editingItemId) {
-            $this->record->items()->where('id', $this->editingItemId)->update($attributes);
-        } else {
-            $maxSort = $this->record->rootItems()->max('sort_order') ?? -1;
-
-            $this->record->items()->create([
-                ...$attributes,
-                'sort_order' => $maxSort + 1,
-            ]);
-        }
-
-        $this->resetItemForm();
-    }
-
-    public function editItem(int $id): void
-    {
-        $item = $this->record->items()->find($id);
-
-        if (! $item) {
-            return;
-        }
-
-        $this->editingItemId = $id;
-
-        if ($item->linkable_type) {
-            $key = self::linkableKey($item->linkable_type);
-            $this->editingForm = $key;
-            $this->linkableData[$key] = [
-                'linkable_id' => $item->linkable_id,
-                'label' => $item->label,
-                'target' => $item->target ?? '_self',
-            ];
-        } else {
-            $this->editingForm = 'custom';
-            $this->customItemData = [
-                'label' => $item->label,
-                'url' => $item->url ?? '',
-                'target' => $item->target ?? '_self',
-            ];
-        }
-    }
-
-    public function deleteItem(int $id): void
-    {
-        $this->record->items()->where('id', $id)->delete();
-
-        if ($this->editingItemId === $id) {
-            $this->resetItemForm();
-        }
-    }
-
-    public function cancelEdit(): void
-    {
-        $this->resetItemForm();
+        return Action::make('deleteItem')
+            ->requiresConfirmation()
+            ->color('danger')
+            ->action(function (array $arguments): void {
+                $this->record->items()->where('id', $arguments['itemId'])->delete();
+            });
     }
 
     /**
@@ -322,6 +265,8 @@ class EditMenu extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->makeEditItemAction(),
+            $this->makeDeleteItemAction(),
             DeleteAction::make(),
         ];
     }
@@ -329,30 +274,6 @@ class EditMenu extends EditRecord
     private static function linkableKey(string $class): string
     {
         return str_replace('\\', '_', strtolower($class));
-    }
-
-    private function initLinkableData(): void
-    {
-        foreach (FilamentMenuPlugin::get()->getLinkables() as $linkable) {
-            $key = self::linkableKey($linkable);
-            $this->linkableData[$key] = [
-                'linkable_id' => null,
-                'label' => '',
-                'target' => '_self',
-            ];
-        }
-    }
-
-    private function resetItemForm(): void
-    {
-        $this->editingItemId = null;
-        $this->editingForm = '';
-        $this->initLinkableData();
-        $this->customItemData = [
-            'label' => '',
-            'url' => '',
-            'target' => '_self',
-        ];
     }
 
     /**
@@ -366,7 +287,7 @@ class EditMenu extends EditRecord
                 'sort_order' => $order++,
             ]);
 
-            if (! empty($item['children'])) {
+            if (!empty($item['children'])) {
                 $this->persistTree($item['children'], $item['id'], $order);
             }
         }

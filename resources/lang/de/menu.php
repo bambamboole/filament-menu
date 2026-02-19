@@ -9,6 +9,8 @@ return [
     'form.name' => 'Name',
     'form.slug' => 'Slug',
 
+    'edit.add_items.title' => 'Einträge hinzufügen',
+
     'edit.location.title' => 'Position',
     'edit.location.label' => 'Menü-Position',
     'edit.location.placeholder' => 'Keine Position zugewiesen',

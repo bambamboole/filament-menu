@@ -18,14 +18,14 @@
             <button
                 type="button"
                 class="text-gray-400 hover:text-primary-500 p-1"
-                wire:click="editItem({{ $item->id }})"
+                x-on:click="$wire.mountAction('editItem', { itemId: {{ $item->id }} })"
             >
                 <x-filament::icon icon="heroicon-m-pencil-square" class="h-4 w-4" />
             </button>
             <button
                 type="button"
                 class="text-gray-400 hover:text-danger-500 p-1"
-                wire:click="deleteItem({{ $item->id }})"
+                x-on:click="$wire.mountAction('deleteItem', { itemId: {{ $item->id }} })"
             >
                 <x-filament::icon icon="heroicon-m-trash" class="h-4 w-4" />
             </button>
