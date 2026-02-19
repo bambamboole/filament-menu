@@ -12,7 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class MenuResource extends Resource
 {
@@ -20,7 +19,10 @@ class MenuResource extends Resource
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBars3;
 
-    protected static UnitEnum | string | null $navigationGroup = 'Content';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament-menu::menu.resource.navigation_group');
+    }
 
     public static function form(Schema $schema): Schema
     {

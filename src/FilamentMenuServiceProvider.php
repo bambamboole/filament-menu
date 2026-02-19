@@ -18,6 +18,7 @@ class FilamentMenuServiceProvider extends PackageServiceProvider
     {
         $package->name(static::$name)
             ->hasViews(static::$viewNamespace)
+            ->hasTranslations()
             ->hasMigrations($this->getMigrations())
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command

@@ -14,6 +14,7 @@ class MenuForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('filament-menu::menu.form.name'))
                     ->required()
                     ->maxLength(255)
                     ->live(onBlur: true)
@@ -26,6 +27,7 @@ class MenuForm
                     }),
 
                 TextInput::make('slug')
+                    ->label(__('filament-menu::menu.form.slug'))
                     ->required()
                     ->maxLength(255)
                     ->unique(Menu::class, 'slug', ignoreRecord: true)

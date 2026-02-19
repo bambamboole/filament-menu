@@ -21,11 +21,11 @@ class MenusTable
 
                 TextColumn::make('items_count')
                     ->counts('items')
-                    ->label('Items'),
+                    ->label(__('filament-menu::menu.table.columns.items')),
 
                 TextColumn::make('locations.location')
                     ->badge()
-                    ->label('Locations'),
+                    ->label(__('filament-menu::menu.table.columns.locations')),
 
                 TextColumn::make('created_at')
                     ->dateTime()

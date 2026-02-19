@@ -41,7 +41,7 @@
         </div>
     @else
         <div class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
-            No menu items yet. Use the form on the left to add items.
+            {{ __('filament-menu::menu.edit.structure.empty') }}
         </div>
     @endif
 </div>

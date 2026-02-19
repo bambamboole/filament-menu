@@ -62,12 +62,12 @@ class EditMenu extends EditRecord
     {
         $locations = FilamentMenuPlugin::get()->getLocations();
 
-        return Section::make('Location')
+        return Section::make(__('filament-menu::menu.edit.location.title'))
             ->schema([
                 Select::make('assignedLocation')
-                    ->label('Menu Location')
+                    ->label(__('filament-menu::menu.edit.location.label'))
                     ->options(array_combine($locations, array_map(ucfirst(...), $locations)))
-                    ->placeholder('No location assigned')
+                    ->placeholder(__('filament-menu::menu.edit.location.placeholder'))
                     ->reactive()
                     ->afterStateUpdated(function (?string $state): void {
                         $this->record->locations()->delete();
@@ -88,39 +88,43 @@ class EditMenu extends EditRecord
 
     protected function getAddItemSection(): Section
     {
-        return Section::make(fn (): string => $this->editingItemId ? 'Edit Menu Item' : 'Add Menu Item')
+        return Section::make(fn (): string => $this->editingItemId
+                ? __('filament-menu::menu.edit.item.title_edit')
+                : __('filament-menu::menu.edit.item.title_add'))
             ->schema([
                 TextInput::make('menuItemData.label')
-                    ->label('Label')
+                    ->label(__('filament-menu::menu.edit.item.label'))
                     ->required(),
 
                 TextInput::make('menuItemData.url')
-                    ->label('URL')
+                    ->label(__('filament-menu::menu.edit.item.url'))
                     ->url(),
 
                 Select::make('menuItemData.target')
-                    ->label('Target')
+                    ->label(__('filament-menu::menu.edit.item.target'))
                     ->options([
-                        '_self' => 'Same Window',
-                        '_blank' => 'New Window',
+                        '_self' => __('filament-menu::menu.edit.item.target_self'),
+                        '_blank' => __('filament-menu::menu.edit.item.target_blank'),
                     ])
                     ->default('_self'),
 
                 Select::make('menuItemData.type')
-                    ->label('Type')
+                    ->label(__('filament-menu::menu.edit.item.type'))
                     ->options([
-                        'link' => 'Link',
-                        'page' => 'Page',
+                        'link' => __('filament-menu::menu.edit.item.type_link'),
+                        'page' => __('filament-menu::menu.edit.item.type_page'),
                     ])
                     ->default('link'),
 
                 \Filament\Schemas\Components\Actions::make([
                     Action::make('addMenuItem')
-                        ->label(fn (): string => $this->editingItemId ? 'Update Item' : 'Add Item')
+                        ->label(fn (): string => $this->editingItemId
+                            ? __('filament-menu::menu.edit.item.button_update')
+                            : __('filament-menu::menu.edit.item.button_add'))
                         ->action('addMenuItem'),
 
                     Action::make('cancelEdit')
-                        ->label('Cancel')
+                        ->label(__('filament-menu::menu.edit.item.button_cancel'))
                         ->color('gray')
                         ->visible(fn (): bool => $this->editingItemId !== null)
                         ->action('cancelEdit'),
@@ -130,7 +134,7 @@ class EditMenu extends EditRecord
 
     protected function getTreeSection(): Section
     {
-        return Section::make('Menu Structure')
+        return Section::make(__('filament-menu::menu.edit.structure.title'))
             ->schema([
                 View::make('filament-menu::menu-tree'),
             ]);
