@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Bambamboole\FilamentMenu\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class FilamentMenuCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'filament-menu';
 
     public $description = 'My command';
 
