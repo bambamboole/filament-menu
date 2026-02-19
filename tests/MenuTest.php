@@ -2,7 +2,6 @@
 
 use Bambamboole\FilamentMenu\Models\Menu;
 use Bambamboole\FilamentMenu\Models\MenuItem;
-use Bambamboole\FilamentMenu\Models\MenuLocation;
 use Bambamboole\FilamentMenu\Tests\Fixtures\LinkablePage;
 
 it('auto-generates slug from name on creation', function () {
@@ -54,23 +53,20 @@ it('builds a nested tree structure', function () {
         ->and($tree[1]['children'])->toBeEmpty();
 });
 
-it('cascades deletes to items and locations', function () {
+it('cascades deletes to items', function () {
     $menu = Menu::factory()->create();
     MenuItem::factory()->create(['menu_id' => $menu->id]);
-    MenuLocation::create(['menu_id' => $menu->id, 'location' => 'header']);
 
     $menu->delete();
 
-    expect(MenuItem::count())->toBe(0)
-        ->and(MenuLocation::count())->toBe(0);
+    expect(MenuItem::count())->toBe(0);
 });
 
 it('can assign a location to a menu', function () {
     $menu = Menu::factory()->create();
-    $menu->locations()->create(['location' => 'footer']);
+    $menu->update(['location' => 'footer']);
 
-    expect($menu->locations)->toHaveCount(1)
-        ->and($menu->locations->first()->location)->toBe('footer');
+    expect($menu->refresh()->location)->toBe('footer');
 });
 
 it('resolves url from linkable model', function () {

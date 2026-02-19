@@ -13,7 +13,17 @@ class MenuItem extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'menu_id',
+        'parent_id',
+        'label',
+        'url',
+        'target',
+        'type',
+        'sort_order',
+        'linkable_type',
+        'linkable_id',
+    ];
 
     /** @return BelongsTo<Menu, $this> */
     public function menu(): BelongsTo

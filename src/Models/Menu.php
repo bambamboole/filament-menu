@@ -11,7 +11,11 @@ class Menu extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'slug',
+        'location',
+    ];
 
     protected static function booted(): void
     {
@@ -32,12 +36,6 @@ class Menu extends Model
     public function rootItems(): HasMany
     {
         return $this->hasMany(MenuItem::class)->whereNull('parent_id')->orderBy('sort_order');
-    }
-
-    /** @return HasMany<MenuLocation, $this> */
-    public function locations(): HasMany
-    {
-        return $this->hasMany(MenuLocation::class);
     }
 
     /**

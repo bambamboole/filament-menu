@@ -227,3 +227,52 @@ it('allows access when canAccess callback returns true', function () {
     $this->get(MenuResource::getUrl('index'))
         ->assertSuccessful();
 });
+
+// Security: cross-menu item operations
+
+it('cannot delete an item belonging to another menu', function () {
+    $menuA = Menu::factory()->create();
+    $menuB = Menu::factory()->create();
+    $itemFromB = MenuItem::factory()->create(['menu_id' => $menuB->id]);
+
+    livewire(EditMenu::class, ['record' => $menuA->id])
+        ->call('deleteItem', $itemFromB->id);
+
+    $this->assertDatabaseHas('menu_items', ['id' => $itemFromB->id]);
+});
+
+it('cannot edit an item belonging to another menu', function () {
+    $menuA = Menu::factory()->create();
+    $menuB = Menu::factory()->create();
+    $itemFromB = MenuItem::factory()->create(['menu_id' => $menuB->id, 'label' => 'Original']);
+
+    livewire(EditMenu::class, ['record' => $menuA->id])
+        ->call('editItem', $itemFromB->id)
+        ->assertSet('editingItemId', null);
+});
+
+it('cannot reorder items belonging to another menu', function () {
+    $menuA = Menu::factory()->create();
+    $menuB = Menu::factory()->create();
+    $itemFromB = MenuItem::factory()->create(['menu_id' => $menuB->id, 'sort_order' => 0]);
+
+    livewire(EditMenu::class, ['record' => $menuA->id])
+        ->call('reorderTree', [
+            ['id' => $itemFromB->id, 'children' => []],
+        ]);
+
+    expect($itemFromB->refresh()->sort_order)->toBe(0);
+});
+
+// Location assignment
+
+it('can assign a location via form', function () {
+    $menu = Menu::factory()->create();
+
+    livewire(EditMenu::class, ['record' => $menu->id])
+        ->fillForm(['location' => 'header'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($menu->refresh()->location)->toBe('header');
+});

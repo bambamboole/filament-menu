@@ -44,7 +44,6 @@ class FilamentMenuServiceProvider extends PackageServiceProvider
         return [
             'create_menus_table',
             'create_menu_items_table',
-            'create_menu_locations_table',
         ];
     }
 }

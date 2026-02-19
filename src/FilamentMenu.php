@@ -3,21 +3,15 @@
 namespace Bambamboole\FilamentMenu;
 
 use Bambamboole\FilamentMenu\Models\Menu;
-use Bambamboole\FilamentMenu\Models\MenuLocation;
 
 class FilamentMenu
 {
     public function getByLocation(string $location): ?Menu
     {
-        $menuLocation = MenuLocation::query()
+        return Menu::query()
             ->where('location', $location)
+            ->with('items')
             ->first();
-
-        if (! $menuLocation) {
-            return null;
-        }
-
-        return $menuLocation->menu->load('items');
     }
 
     public function getBySlug(string $slug): ?Menu

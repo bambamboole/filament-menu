@@ -23,9 +23,9 @@ class MenusTable
                     ->counts('items')
                     ->label(__('filament-menu::menu.table.columns.items')),
 
-                TextColumn::make('locations.location')
+                TextColumn::make('location')
                     ->badge()
-                    ->label(__('filament-menu::menu.table.columns.locations')),
+                    ->label(__('filament-menu::menu.table.columns.location')),
 
                 TextColumn::make('created_at')
                     ->dateTime()

@@ -3,12 +3,10 @@
 use Bambamboole\FilamentMenu\FilamentMenu;
 use Bambamboole\FilamentMenu\Models\Menu;
 use Bambamboole\FilamentMenu\Models\MenuItem;
-use Bambamboole\FilamentMenu\Models\MenuLocation;
 
 it('retrieves a menu by location', function () {
-    $menu = Menu::factory()->create();
+    $menu = Menu::factory()->create(['location' => 'header']);
     MenuItem::factory()->create(['menu_id' => $menu->id]);
-    MenuLocation::create(['menu_id' => $menu->id, 'location' => 'header']);
 
     $helper = new FilamentMenu;
     $result = $helper->getByLocation('header');

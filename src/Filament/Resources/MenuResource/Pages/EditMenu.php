@@ -4,8 +4,6 @@ namespace Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages;
 
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
 use Bambamboole\FilamentMenu\FilamentMenuPlugin;
-use Bambamboole\FilamentMenu\Models\MenuItem;
-use Bambamboole\FilamentMenu\Models\MenuLocation;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
@@ -39,14 +37,9 @@ class EditMenu extends EditRecord
 
     public string $editingForm = '';
 
-    public ?string $assignedLocation = null;
-
     public function mount(int | string $record): void
     {
         parent::mount($record);
-
-        $location = $this->record->locations()->first();
-        $this->assignedLocation = $location?->location;
 
         $this->initLinkableData();
     }
@@ -62,7 +55,6 @@ class EditMenu extends EditRecord
         return $schema
             ->components([
                 $this->getFormContentComponent(),
-                $this->getLocationSection(),
                 Grid::make(2)
                     ->schema([
                         Grid::make(1)
@@ -73,34 +65,6 @@ class EditMenu extends EditRecord
                         $this->getTreeSection(),
                     ]),
             ]);
-    }
-
-    protected function getLocationSection(): Section
-    {
-        $locations = FilamentMenuPlugin::get()->getLocations();
-
-        return Section::make(__('filament-menu::menu.edit.location.title'))
-            ->schema([
-                Select::make('assignedLocation')
-                    ->label(__('filament-menu::menu.edit.location.label'))
-                    ->options(array_combine($locations, array_map(ucfirst(...), $locations)))
-                    ->placeholder(__('filament-menu::menu.edit.location.placeholder'))
-                    ->reactive()
-                    ->afterStateUpdated(function (?string $state): void {
-                        $this->record->locations()->delete();
-
-                        if ($state !== null) {
-                            MenuLocation::query()
-                                ->where('location', $state)
-                                ->delete();
-
-                            $this->record->locations()->create([
-                                'location' => $state,
-                            ]);
-                        }
-                    }),
-            ])
-            ->visible(fn (): bool => $locations !== []);
     }
 
     protected function getLinkableSection(string $linkable): Section
@@ -250,7 +214,7 @@ class EditMenu extends EditRecord
         ];
 
         if ($this->editingItemId) {
-            MenuItem::find($this->editingItemId)?->update($attributes);
+            $this->record->items()->where('id', $this->editingItemId)->update($attributes);
         } else {
             $maxSort = $this->record->rootItems()->max('sort_order') ?? -1;
 
@@ -291,7 +255,7 @@ class EditMenu extends EditRecord
         ];
 
         if ($this->editingItemId) {
-            MenuItem::find($this->editingItemId)?->update($attributes);
+            $this->record->items()->where('id', $this->editingItemId)->update($attributes);
         } else {
             $maxSort = $this->record->rootItems()->max('sort_order') ?? -1;
 
@@ -306,7 +270,7 @@ class EditMenu extends EditRecord
 
     public function editItem(int $id): void
     {
-        $item = MenuItem::find($id);
+        $item = $this->record->items()->find($id);
 
         if (! $item) {
             return;
@@ -334,7 +298,7 @@ class EditMenu extends EditRecord
 
     public function deleteItem(int $id): void
     {
-        MenuItem::destroy($id);
+        $this->record->items()->where('id', $id)->delete();
 
         if ($this->editingItemId === $id) {
             $this->resetItemForm();
@@ -397,7 +361,7 @@ class EditMenu extends EditRecord
     private function persistTree(array $items, ?int $parentId, int &$order): void
     {
         foreach ($items as $item) {
-            MenuItem::where('id', $item['id'])->update([
+            $this->record->items()->where('id', $item['id'])->update([
                 'parent_id' => $parentId,
                 'sort_order' => $order++,
             ]);

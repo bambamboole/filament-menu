@@ -4,7 +4,7 @@ return [
     'resource.navigation_group' => 'Inhalte',
 
     'table.columns.items' => 'Einträge',
-    'table.columns.locations' => 'Positionen',
+    'table.columns.location' => 'Position',
 
     'form.name' => 'Name',
     'form.slug' => 'Slug',
