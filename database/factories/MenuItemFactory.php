@@ -11,7 +11,7 @@ class MenuItemFactory extends Factory
 {
     protected $model = MenuItem::class;
 
-    /** @return array{menu_id: int, label: string, url: string, target: string, type: string, sort_order: int} */
+    /** @return array{menu_id: int, label: string, url: string, target: string, sort_order: int} */
     public function definition(): array
     {
         return [
@@ -19,7 +19,6 @@ class MenuItemFactory extends Factory
             'label' => fake()->words(2, true),
             'url' => fake()->url(),
             'target' => '_self',
-            'type' => 'link',
             'sort_order' => 0,
         ];
     }

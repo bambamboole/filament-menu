@@ -2,6 +2,8 @@
 
 namespace Bambamboole\FilamentMenu\Models;
 
+use Bambamboole\FilamentMenu\FilamentMenu;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +26,19 @@ class Menu extends Model
                 $menu->slug = Str::slug($menu->name);
             }
         });
+
+        static::saved(fn () => FilamentMenu::flush());
+        static::deleted(fn () => FilamentMenu::flush());
+    }
+
+    public static function findByLocation(string $location): ?self
+    {
+        return app(FilamentMenu::class)->getByLocation($location);
+    }
+
+    public static function findBySlug(string $slug): ?self
+    {
+        return app(FilamentMenu::class)->getBySlug($slug);
     }
 
     /** @return HasMany<MenuItem, $this> */
@@ -39,31 +54,63 @@ class Menu extends Model
     }
 
     /**
-     * @return array<int, array{id: int, label: string, url: ?string, target: ?string, type: string, children: array<int, mixed>}>
+     * Load all items flat and build a nested collection of MenuItem models.
+     * Unlike eager-loading children.children.children, this supports unlimited depth.
+     *
+     * @return Collection<int, MenuItem>
+     */
+    public function getTreeItems(): Collection
+    {
+        $items = $this->items()->with('linkable')->get();
+        $grouped = $items->groupBy(fn (MenuItem $item): int => $item->parent_id ?? 0);
+
+        $this->buildTreeRelations($grouped, 0);
+
+        return $grouped->get(0, collect());
+    }
+
+    /**
+     * Recursively set the 'children' relation on each MenuItem from the grouped collection.
+     *
+     * @param  \Illuminate\Support\Collection<int, Collection<int, MenuItem>>  $grouped
+     */
+    private function buildTreeRelations($grouped, int $parentId): void
+    {
+        foreach ($grouped->get($parentId, collect()) as $item) {
+            $children = $grouped->get($item->id, collect());
+            $item->setRelation('children', $children);
+
+            if ($children->isNotEmpty()) {
+                $this->buildTreeRelations($grouped, $item->id);
+            }
+        }
+    }
+
+    /**
+     * @return array<int, array{id: int, label: string, url: ?string, target: ?string, children: array<int, mixed>}>
      */
     public function getTree(): array
     {
         $items = $this->items()->with('linkable')->get();
-        $grouped = $items->groupBy('parent_id');
+        $grouped = $items->groupBy(fn (MenuItem $item): int => $item->parent_id ?? 0);
 
-        return $this->buildTree($grouped, null);
+        return $this->buildTree($grouped, 0);
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int|string, \Illuminate\Support\Collection<int, MenuItem>>  $grouped
-     * @return array<int, array{id: int, label: string, url: ?string, target: ?string, type: string, children: array<int, mixed>}>
+     * @param  \Illuminate\Support\Collection<int, \Illuminate\Support\Collection<int, MenuItem>>  $grouped
+     * @return array<int, array{id: int, label: string, url: ?string, target: ?string, children: array<int, mixed>}>
      */
-    private function buildTree($grouped, ?int $parentId): array
+    private function buildTree($grouped, int $parentId): array
     {
         $branch = [];
 
-        foreach ($grouped->get($parentId ?? '', collect()) as $item) {
+        foreach ($grouped->get($parentId, collect()) as $item) {
             $branch[] = [
                 'id' => $item->id,
                 'label' => $item->label,
                 'url' => $item->getUrl(),
                 'target' => $item->target,
-                'type' => $item->type,
                 'children' => $this->buildTree($grouped, $item->id),
             ];
         }

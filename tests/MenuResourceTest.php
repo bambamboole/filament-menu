@@ -82,7 +82,7 @@ it('can add a custom menu item', function () {
     $menu = Menu::factory()->create();
 
     livewire(EditMenu::class, ['record' => $menu->id])
-        ->callAction('addCustomLink', [
+        ->callAction(TestAction::make('addCustomLink')->schemaComponent('add-menu-item-actions', schema: 'content'), [
             'label' => 'Home',
             'url' => 'https://example.com',
             'target' => '_self',
@@ -118,7 +118,7 @@ it('can add a linked menu item', function () {
     $key = str_replace('\\', '_', strtolower(LinkablePage::class));
 
     livewire(EditMenu::class, ['record' => $menu->id])
-        ->callAction("addLinkable_{$key}", [
+        ->callAction(TestAction::make("addLinkable_{$key}")->schemaComponent('add-menu-item-actions', schema: 'content'), [
             'linkable_id' => $page->id,
             'label' => 'About',
             'target' => '_self',

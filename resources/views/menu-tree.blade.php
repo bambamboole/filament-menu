@@ -35,7 +35,7 @@
                 },
             }"
         >
-            @foreach($this->record->rootItems()->with('children.children.children')->get() as $item)
+            @foreach($this->record->getTreeItems() as $item)
                 @include('filament-menu::menu-item', ['item' => $item])
             @endforeach
         </div>

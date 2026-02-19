@@ -28,6 +28,11 @@ class FilamentMenuServiceProvider extends PackageServiceProvider
             });
     }
 
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(FilamentMenu::class);
+    }
+
     public function packageBooted(): void
     {
         FilamentAsset::register(

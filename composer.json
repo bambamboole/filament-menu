@@ -62,10 +62,7 @@
         "laravel": {
             "providers": [
                 "Bambamboole\\FilamentMenu\\FilamentMenuServiceProvider"
-            ],
-            "aliases": {
-                "FilamentMenu": "Bambamboole\\FilamentMenu\\Facades\\FilamentMenu"
-            }
+            ]
         }
     },
     "config": {

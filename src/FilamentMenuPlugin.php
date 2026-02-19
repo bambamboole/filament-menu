@@ -18,6 +18,8 @@ class FilamentMenuPlugin implements Plugin
 
     protected ?Closure $canAccess = null;
 
+    protected ?int $cacheTtl = null;
+
     public function getId(): string
     {
         return 'filament-menu';
@@ -85,6 +87,18 @@ class FilamentMenuPlugin implements Plugin
         }
 
         return ($this->canAccess)();
+    }
+
+    public function cacheFor(int $seconds): static
+    {
+        $this->cacheTtl = $seconds;
+
+        return $this;
+    }
+
+    public function getCacheTtl(): ?int
+    {
+        return $this->cacheTtl;
     }
 
     public static function make(): static

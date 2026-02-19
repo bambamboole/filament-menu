@@ -10,6 +10,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -48,7 +49,7 @@ class EditMenu extends EditRecord
 
         return Section::make(__('filament-menu::menu.edit.add_items.title'))
             ->schema([
-                \Filament\Schemas\Components\Actions::make($actions),
+                Actions::make($actions)->key('add-menu-item-actions'),
             ]);
     }
 
@@ -112,7 +113,6 @@ class EditMenu extends EditRecord
                 $this->record->items()->create([
                     'label' => $data['label'],
                     'target' => $data['target'],
-                    'type' => $linkable,
                     'url' => null,
                     'linkable_type' => $linkable,
                     'linkable_id' => $data['linkable_id'],
@@ -150,10 +150,7 @@ class EditMenu extends EditRecord
                 $this->record->items()->create([
                     'label' => $data['label'],
                     'target' => $data['target'],
-                    'type' => 'link',
                     'url' => $data['url'],
-                    'linkable_type' => null,
-                    'linkable_id' => null,
                     'sort_order' => $maxSort + 1,
                 ]);
             });
@@ -167,7 +164,7 @@ class EditMenu extends EditRecord
             ->mountUsing(function (Schema $form, array $arguments): void {
                 $item = $this->record->items()->find($arguments['itemId']);
 
-                if (!$item) {
+                if (! $item) {
                     return;
                 }
 
@@ -190,19 +187,21 @@ class EditMenu extends EditRecord
                 Hidden::make('item_type'),
                 Hidden::make('linkable_type'),
 
-                ...array_map(fn (string $linkable): Select => Select::make('linkable_id')
-                    ->label(__('filament-menu::menu.edit.linked.record'))
-                    ->searchable()
-                    ->preload()
-                    ->getSearchResultsUsing(fn (string $search): array => $linkable::getLinkableSearchResults($search))
-                    ->getOptionLabelUsing(function ($value) use ($linkable): ?string {
-                        $record = $linkable::find($value);
+                ...array_map(
+                    fn (string $linkable): Select => Select::make('linkable_id')
+                        ->label(__('filament-menu::menu.edit.linked.record'))
+                        ->searchable()
+                        ->preload()
+                        ->getSearchResultsUsing(fn (string $search): array => $linkable::getLinkableSearchResults($search))
+                        ->getOptionLabelUsing(function ($value) use ($linkable): ?string {
+                            $record = $linkable::find($value);
 
-                        return $record?->{$linkable::getNameColumn()};
-                    })
-                    ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'))
-                    ->visible(fn (Get $get): bool => $get('item_type') === 'linkable' && $get('linkable_type') === $linkable),
-                    $linkables),
+                            return $record?->{$linkable::getNameColumn()};
+                        })
+                        ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'))
+                        ->visible(fn (Get $get): bool => $get('item_type') === 'linkable' && $get('linkable_type') === $linkable),
+                    $linkables
+                ),
 
                 TextInput::make('url')
                     ->label(__('filament-menu::menu.edit.custom.url'))
@@ -224,7 +223,7 @@ class EditMenu extends EditRecord
             ->action(function (array $data, array $arguments): void {
                 $item = $this->record->items()->find($arguments['itemId']);
 
-                if (!$item) {
+                if (! $item) {
                     return;
                 }
 
@@ -287,7 +286,7 @@ class EditMenu extends EditRecord
                 'sort_order' => $order++,
             ]);
 
-            if (!empty($item['children'])) {
+            if (! empty($item['children'])) {
                 $this->persistTree($item['children'], $item['id'], $order);
             }
         }
