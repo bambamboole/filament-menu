@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Bambamboole\FilamentMenu\Contracts;
+namespace Bambamboole\FilamentMenu\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,17 +20,6 @@ trait IsLinkable
 
     public function getLink(): string
     {
-        return $this->url;
-    }
-
-    /** @return array<int|string, string> */
-    public static function getLinkableSearchResults(string $search): array
-    {
-        $nameColumn = static::getNameColumn();
-
-        return static::getLinkableQuery()
-            ->where($nameColumn, 'like', "%{$search}%")
-            ->pluck($nameColumn, (new static)->getKeyName())
-            ->all();
+        return $this->getAttribute('url');
     }
 }
