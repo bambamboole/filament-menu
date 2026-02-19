@@ -21,6 +21,6 @@ class LinkablePage extends Model implements Linkable
 
     public function getLink(): string
     {
-        return '/pages/' . $this->slug;
+        return '/pages/'.$this->slug;
     }
 }

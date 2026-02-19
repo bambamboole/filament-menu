@@ -164,7 +164,7 @@ class EditMenu extends EditRecord
             ->mountUsing(function (Schema $form, array $arguments): void {
                 $item = $this->record->items()->find($arguments['itemId']);
 
-                if (! $item) {
+                if (!$item) {
                     return;
                 }
 
@@ -223,7 +223,7 @@ class EditMenu extends EditRecord
             ->action(function (array $data, array $arguments): void {
                 $item = $this->record->items()->find($arguments['itemId']);
 
-                if (! $item) {
+                if (!$item) {
                     return;
                 }
 
@@ -286,7 +286,7 @@ class EditMenu extends EditRecord
                 'sort_order' => $order++,
             ]);
 
-            if (! empty($item['children'])) {
+            if (!empty($item['children'])) {
                 $this->persistTree($item['children'], $item['id'], $order);
             }
         }

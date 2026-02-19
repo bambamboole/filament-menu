@@ -36,7 +36,7 @@ class FilamentMenuServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         FilamentAsset::register(
-            [Js::make('filament-menu', __DIR__ . '/../resources/dist/filament-menu.js')],
+            [Js::make('filament-menu', __DIR__.'/../resources/dist/filament-menu.js')],
             'bambamboole/filament-menu'
         );
     }

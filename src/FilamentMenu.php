@@ -78,7 +78,7 @@ class FilamentMenu
         // Track keys for flushing
         $allKeys = Cache::get('filament-menu:all-keys', []);
 
-        if (! in_array($key, $allKeys)) {
+        if (!in_array($key, $allKeys)) {
             $allKeys[] = $key;
             Cache::forever('filament-menu:all-keys', $allKeys);
         }
