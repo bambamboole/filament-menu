@@ -21,4 +21,3 @@ it('returns null for unknown location', function () {
 
     expect($helper->getByLocation('nonexistent'))->toBeNull();
 });
-

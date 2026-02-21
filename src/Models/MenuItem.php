@@ -83,6 +83,6 @@ class MenuItem extends Model
             return $url;
         }
 
-        return '/' . $locale . Str::start($url, '/');
+        return '/'.$locale.Str::start($url, '/');
     }
 }

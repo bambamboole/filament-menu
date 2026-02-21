@@ -112,7 +112,7 @@ class FilamentMenu
 
     private function resolveLocale(?string $locale): ?string
     {
-        if (! $this->hasLocales()) {
+        if (!$this->hasLocales()) {
             return null;
         }
 
