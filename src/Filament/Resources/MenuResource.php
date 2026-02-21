@@ -27,7 +27,7 @@ class MenuResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-menu::menu.resource.navigation_group');
+        return __('filament-menu::menu.resource.navigation-group');
     }
 
     public static function form(Schema $schema): Schema

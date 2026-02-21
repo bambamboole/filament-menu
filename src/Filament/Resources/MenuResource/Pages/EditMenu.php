@@ -47,7 +47,7 @@ class EditMenu extends EditRecord
 
         $actions[] = $this->makeAddCustomLinkAction();
 
-        return Section::make(__('filament-menu::menu.edit.add_items.title'))
+        return Section::make(__('filament-menu::menu.edit.add-items.title'))
             ->schema([
                 Actions::make($actions)->key('add-menu-item-actions'),
             ]);
@@ -66,7 +66,7 @@ class EditMenu extends EditRecord
         $key = self::linkableKey($linkable);
 
         return Action::make("addLinkable_{$key}")
-            ->label(__('filament-menu::menu.edit.linked.title_add', ['type' => $label]))
+            ->label(__('filament-menu::menu.edit.linked.title-add', ['type' => $label]))
             ->schema([
                 Select::make('linkable_id')
                     ->label(__('filament-menu::menu.edit.linked.record'))
@@ -103,8 +103,8 @@ class EditMenu extends EditRecord
                 Select::make('target')
                     ->label(__('filament-menu::menu.edit.linked.target'))
                     ->options([
-                        '_self' => __('filament-menu::menu.edit.item.target_self'),
-                        '_blank' => __('filament-menu::menu.edit.item.target_blank'),
+                        '_self' => __('filament-menu::menu.edit.item.target-self'),
+                        '_blank' => __('filament-menu::menu.edit.item.target-blank'),
                     ])
                     ->default('_self'),
             ])
@@ -125,7 +125,7 @@ class EditMenu extends EditRecord
     private function makeAddCustomLinkAction(): Action
     {
         return Action::make('addCustomLink')
-            ->label(__('filament-menu::menu.edit.custom.title_add'))
+            ->label(__('filament-menu::menu.edit.custom.title-add'))
             ->schema([
                 TextInput::make('label')
                     ->label(__('filament-menu::menu.edit.custom.label'))
@@ -140,8 +140,8 @@ class EditMenu extends EditRecord
                 Select::make('target')
                     ->label(__('filament-menu::menu.edit.custom.target'))
                     ->options([
-                        '_self' => __('filament-menu::menu.edit.item.target_self'),
-                        '_blank' => __('filament-menu::menu.edit.item.target_blank'),
+                        '_self' => __('filament-menu::menu.edit.item.target-self'),
+                        '_blank' => __('filament-menu::menu.edit.item.target-blank'),
                     ])
                     ->default('_self'),
             ])
@@ -220,8 +220,8 @@ class EditMenu extends EditRecord
                 Select::make('target')
                     ->label(__('filament-menu::menu.edit.linked.target'))
                     ->options([
-                        '_self' => __('filament-menu::menu.edit.item.target_self'),
-                        '_blank' => __('filament-menu::menu.edit.item.target_blank'),
+                        '_self' => __('filament-menu::menu.edit.item.target-self'),
+                        '_blank' => __('filament-menu::menu.edit.item.target-blank'),
                     ]),
             ])
             ->action(function (array $data, array $arguments): void {
