@@ -5,9 +5,11 @@ return [
 
     'table.columns.items' => 'Einträge',
     'table.columns.location' => 'Position',
+    'table.columns.locale' => 'Sprache',
 
     'form.name' => 'Name',
     'form.slug' => 'Slug',
+    'form.locale' => 'Sprache',
 
     'edit.add-items.title' => 'Einträge hinzufügen',
 

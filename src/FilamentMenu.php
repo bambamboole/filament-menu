@@ -15,6 +15,9 @@ class FilamentMenu
     /** @var array<class-string<Linkable>, string> */
     protected array $linkables = [];
 
+    /** @var array<string, string> */
+    protected array $locales = [];
+
     public function location(string $key, string $label): static
     {
         $this->locations[$key] = $label;
@@ -48,33 +51,44 @@ class FilamentMenu
         return $this->linkables;
     }
 
-    public function getByLocation(string $location): ?Menu
+    /**
+     * @param  array<string, string>  $locales
+     */
+    public function setLocales(array $locales): static
     {
-        $seconds = $this->getCacheTtl();
+        $this->locales = $locales;
 
-        if ($seconds === null) {
-            return $this->queryByLocation($location);
-        }
-
-        return Cache::remember(
-            $this->cacheKey('location', $location),
-            $seconds,
-            fn (): ?Menu => $this->queryByLocation($location),
-        );
+        return $this;
     }
 
-    public function getBySlug(string $slug): ?Menu
+    /**
+     * @return array<string, string>
+     */
+    public function getLocales(): array
     {
+        return $this->locales;
+    }
+
+    public function hasLocales(): bool
+    {
+        return $this->locales !== [];
+    }
+
+    public function getByLocation(string $location, ?string $locale = null): ?Menu
+    {
+        $locale = $this->resolveLocale($locale);
         $seconds = $this->getCacheTtl();
 
         if ($seconds === null) {
-            return $this->queryBySlug($slug);
+            return $this->queryByLocation($location, $locale);
         }
 
+        $cacheKeySuffix = $locale !== null ? "{$location}:{$locale}" : $location;
+
         return Cache::remember(
-            $this->cacheKey('slug', $slug),
+            $this->cacheKey('location', $cacheKeySuffix),
             $seconds,
-            fn (): ?Menu => $this->queryBySlug($slug),
+            fn (): ?Menu => $this->queryByLocation($location, $locale),
         );
     }
 
@@ -87,20 +101,22 @@ class FilamentMenu
         }
     }
 
-    private function queryByLocation(string $location): ?Menu
+    private function queryByLocation(string $location, ?string $locale): ?Menu
     {
         return Menu::query()
             ->where('location', $location)
+            ->when($locale !== null, fn ($query) => $query->where('locale', $locale))
             ->with('items.linkable')
             ->first();
     }
 
-    private function queryBySlug(string $slug): ?Menu
+    private function resolveLocale(?string $locale): ?string
     {
-        return Menu::query()
-            ->where('slug', $slug)
-            ->with('items.linkable')
-            ->first();
+        if (! $this->hasLocales()) {
+            return null;
+        }
+
+        return $locale ?? app()->getLocale();
     }
 
     private function getCacheTtl(): ?int

@@ -17,6 +17,7 @@ class Menu extends Model
         'name',
         'slug',
         'location',
+        'locale',
     ];
 
     protected static function booted(): void
@@ -31,14 +32,9 @@ class Menu extends Model
         static::deleted(fn () => app(FilamentMenu::class)->flush());
     }
 
-    public static function findByLocation(string $location): ?self
+    public static function findByLocation(string $location, ?string $locale = null): ?self
     {
-        return app(FilamentMenu::class)->getByLocation($location);
-    }
-
-    public static function findBySlug(string $slug): ?self
-    {
-        return app(FilamentMenu::class)->getBySlug($slug);
+        return app(FilamentMenu::class)->getByLocation($location, $locale);
     }
 
     /** @return HasMany<MenuItem, $this> */

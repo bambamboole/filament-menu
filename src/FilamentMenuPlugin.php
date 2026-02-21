@@ -14,6 +14,9 @@ class FilamentMenuPlugin implements Plugin
 
     protected ?int $cacheTtl = null;
 
+    /** @var array<string, string> */
+    protected array $locales = [];
+
     public function getId(): string
     {
         return 'filament-menu';
@@ -74,6 +77,25 @@ class FilamentMenuPlugin implements Plugin
     public function getCacheTtl(): ?int
     {
         return $this->cacheTtl;
+    }
+
+    /**
+     * @param  array<string, string>  $locales  e.g. ['en' => 'English', 'de' => 'Deutsch']
+     */
+    public function locales(array $locales): static
+    {
+        $this->locales = $locales;
+        app(FilamentMenu::class)->setLocales($locales);
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getLocales(): array
+    {
+        return $this->locales;
     }
 
     public static function make(): static

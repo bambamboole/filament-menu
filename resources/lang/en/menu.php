@@ -5,9 +5,11 @@ return [
 
     'table.columns.items' => 'Items',
     'table.columns.location' => 'Location',
+    'table.columns.locale' => 'Locale',
 
     'form.name' => 'Name',
     'form.slug' => 'Slug',
+    'form.locale' => 'Locale',
 
     'edit.add-items.title' => 'Add Items',
 

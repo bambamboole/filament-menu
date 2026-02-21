@@ -1,17 +1,10 @@
 @props([
-    'location' => null,
-    'slug' => null,
+    'location',
+    'locale' => null,
 ])
 
 @php
-    $menu = null;
-
-    if ($location) {
-        $menu = \Bambamboole\FilamentMenu\Models\Menu::findByLocation($location);
-    } elseif ($slug) {
-        $menu = \Bambamboole\FilamentMenu\Models\Menu::findBySlug($slug);
-    }
-
+    $menu = \Bambamboole\FilamentMenu\Models\Menu::findByLocation($location, $locale);
     $tree = $menu?->getTree() ?? [];
 @endphp
 

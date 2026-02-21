@@ -13,7 +13,9 @@ class MenuForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $locations = app(FilamentMenu::class)->getLocations();
+        $service = app(FilamentMenu::class);
+        $locations = $service->getLocations();
+        $locales = $service->getLocales();
 
         return $schema
             ->components([
@@ -43,6 +45,11 @@ class MenuForm
                     ->placeholder(__('filament-menu::menu.edit.location.placeholder'))
                     ->unique(Menu::class, 'location', ignoreRecord: true)
                     ->visible(fn (): bool => $locations !== []),
+
+                Select::make('locale')
+                    ->label(__('filament-menu::menu.form.locale'))
+                    ->options($locales)
+                    ->visible(fn (): bool => $locales !== []),
             ]);
     }
 }

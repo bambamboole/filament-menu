@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array<string, string> getLocations()
  * @method static \Bambamboole\FilamentMenu\FilamentMenu linkable(string $class, ?string $label = null)
  * @method static array<class-string<\Bambamboole\FilamentMenu\Contracts\Linkable>, string> getLinkables()
- * @method static Menu|null getByLocation(string $location)
- * @method static Menu|null getBySlug(string $slug)
+ * @method static Menu|null getByLocation(string $location, ?string $locale = null)
  * @method static void flush()
  *
  * @see \Bambamboole\FilamentMenu\FilamentMenu
