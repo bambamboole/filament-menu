@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Str;
 
 class MenuItem extends Model
 {
@@ -59,30 +58,9 @@ class MenuItem extends Model
     public function getUrl(): ?string
     {
         if ($this->linkable instanceof Linkable) {
-            $url = $this->linkable->getLink();
-        } else {
-            $url = $this->url;
+            return $this->linkable->getLink();
         }
 
-        return $this->prefixLocale($url);
-    }
-
-    private function prefixLocale(?string $url): ?string
-    {
-        if ($url === null || $url === '') {
-            return $url;
-        }
-
-        if (str_starts_with($url, 'http') || str_starts_with($url, '#') || str_starts_with($url, 'mailto:')) {
-            return $url;
-        }
-
-        $locale = $this->menu?->locale;
-
-        if ($locale === null) {
-            return $url;
-        }
-
-        return '/'.$locale.Str::start($url, '/');
+        return $this->url;
     }
 }
