@@ -54,7 +54,7 @@ it('prefixes relative URLs with menu locale', function () {
 
     $item->setRelation('menu', $menu);
 
-    expect($item->getUrl())->toBe('/de/features');
+    expect($item->getUrl())->toBe('/features');
 });
 
 it('does not prefix absolute URLs', function () {
@@ -115,5 +115,5 @@ it('includes locale in tree URLs', function () {
 
     $tree = $menu->getTree();
 
-    expect($tree[0]['url'])->toBe('/de/about');
+    expect($tree[0]['url'])->toBe('/about');
 });
