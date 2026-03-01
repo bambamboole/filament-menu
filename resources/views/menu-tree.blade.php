@@ -18,7 +18,7 @@
     @if($this->record->items()->count() > 0)
         <div
             id="parentNested"
-            class="nested"
+            class="nested space-y-2"
             x-data="{
                 init() {
                     new Sortable(this.$el, {

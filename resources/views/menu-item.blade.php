@@ -1,5 +1,5 @@
 <div class="item" data-id="{{ $item->id }}" wire:key="menu-item-{{ $item->id }}">
-    <div class="flex justify-between mb-1 items-center rounded-lg bg-white border border-gray-200 shadow-sm pr-2 dark:bg-gray-800 dark:border-gray-700">
+    <div class="flex justify-between items-center rounded-lg bg-white border border-gray-200 shadow-sm pr-2 dark:bg-gray-800 dark:border-gray-700">
         <div class="flex items-center">
             <div class="border-r border-gray-200 dark:border-gray-700 cursor-grab">
                 <x-filament::icon
@@ -33,7 +33,7 @@
     </div>
 
     <div
-        class="nested" style="margin-left: 1.5rem"
+        class="nested mt-2 space-y-2" style="margin-left: 1.5rem"
         data-id="{{ $item->id }}"
         x-data="{
             init() {

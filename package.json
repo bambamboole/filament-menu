@@ -2,15 +2,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev:js": "node bin/build.js --dev",
-        "dev:css": "npx @tailwindcss/cli -i resources/css/filament-menu.css -o resources/dist/filament-menu.css --watch",
-        "dev": "npm run dev:js & npm run dev:css",
-        "build:js": "node bin/build.js",
-        "build:css": "npx @tailwindcss/cli -i resources/css/filament-menu.css -o resources/dist/filament-menu.css --minify",
-        "build": "npm run build:js && npm run build:css"
+        "dev": "node bin/build.js --dev",
+        "build": "node bin/build.js"
     },
     "devDependencies": {
-        "@tailwindcss/cli": "^4.0.0",
         "esbuild": "^0.25.5",
         "prettier": "^3.5.3",
         "sortablejs": "^1.15.6"
