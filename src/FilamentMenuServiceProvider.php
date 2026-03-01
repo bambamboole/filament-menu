@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Bambamboole\FilamentMenu;
 
+use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -36,7 +37,10 @@ class FilamentMenuServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         FilamentAsset::register(
-            [Js::make('filament-menu', __DIR__.'/../resources/dist/filament-menu.js')],
+            [
+                Css::make('filament-menu', __DIR__.'/../resources/dist/filament-menu.css'),
+                Js::make('filament-menu', __DIR__.'/../resources/dist/filament-menu.js'),
+            ],
             'bambamboole/filament-menu'
         );
     }

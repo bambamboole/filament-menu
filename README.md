@@ -13,12 +13,6 @@ drag-and-drop ordering, nesting, and linkable Eloquent models.
 composer require bambamboole/filament-menu
 ```
 
-Add the plugin views to your custom theme's CSS file:
-
-```css
-@source '../../../../vendor/bambamboole/filament-menu/resources/**/*.blade.php';
-```
-
 ## Usage
 
 Register the plugin in your panel provider:
