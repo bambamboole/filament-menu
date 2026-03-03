@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace Bambamboole\FilamentMenu\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;

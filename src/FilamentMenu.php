@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace Bambamboole\FilamentMenu;
 
 use Bambamboole\FilamentMenu\Contracts\Linkable;
