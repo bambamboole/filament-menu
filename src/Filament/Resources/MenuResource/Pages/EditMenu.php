@@ -26,6 +26,7 @@ class EditMenu extends EditRecord
 {
     protected static string $resource = MenuResource::class;
 
+    #[\Override]
     public function content(Schema $schema): Schema
     {
         return $schema
@@ -65,12 +66,12 @@ class EditMenu extends EditRecord
 
     private function makeAddLinkableAction(string $linkable, string $label): Action
     {
-        $key = self::linkableKey($linkable);
+        $key = $this->linkableKey($linkable);
 
         return Action::make("addLinkable_{$key}")
             ->label(__('filament-menu::menu.edit.linked.title-add', ['type' => $label]))
             ->schema([
-                self::makeLinkableSelect($linkable)
+                $this->makeLinkableSelect($linkable)
                     ->required()
                     ->live()
                     ->afterStateUpdated(function (?int $state, Set $set) use ($linkable): void {
@@ -153,7 +154,7 @@ class EditMenu extends EditRecord
 
         return Action::make('editItem')
             ->mountUsing(function (Schema $form, array $arguments): void {
-                $item = $this->record->items()->find($arguments['itemId']);
+                $item = $this->record->items()->where('id', $arguments['itemId'])->first();
 
                 if (!$item) {
                     return;
@@ -179,7 +180,7 @@ class EditMenu extends EditRecord
                 Hidden::make('linkable_type'),
 
                 ...array_map(
-                    fn (string $linkable): Select => self::makeLinkableSelect($linkable)
+                    fn (string $linkable): Select => $this->makeLinkableSelect($linkable)
                         ->preload()
                         ->visible(fn (Get $get): bool => $get('item_type') === 'linkable' && $get('linkable_type') === $linkable),
                     $linkables
@@ -203,7 +204,7 @@ class EditMenu extends EditRecord
                     ]),
             ])
             ->action(function (array $data, array $arguments): void {
-                $item = $this->record->items()->find($arguments['itemId']);
+                $item = $this->record->items()->where('id', $arguments['itemId'])->first();
 
                 if (!$item) {
                     return;
@@ -243,6 +244,7 @@ class EditMenu extends EditRecord
         $this->persistTree($tree, null, $order);
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -250,7 +252,7 @@ class EditMenu extends EditRecord
         ];
     }
 
-    private static function makeLinkableSelect(string $linkable): Select
+    private function makeLinkableSelect(string $linkable): Select
     {
         return Select::make('linkable_id')
             ->label(__('filament-menu::menu.edit.linked.record'))
@@ -267,7 +269,7 @@ class EditMenu extends EditRecord
             ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'));
     }
 
-    private static function linkableKey(string $class): string
+    private function linkableKey(string $class): string
     {
         return str_replace('\\', '_', strtolower($class));
     }

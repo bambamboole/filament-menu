@@ -20,26 +20,31 @@ class MenuResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBars3;
 
+    #[\Override]
     public static function canAccess(): bool
     {
         return FilamentMenuPlugin::get()->isAuthorized();
     }
 
+    #[\Override]
     public static function getNavigationGroup(): ?string
     {
         return __('filament-menu::menu.resource.navigation-group');
     }
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return MenuForm::configure($schema);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return MenusTable::configure($table);
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

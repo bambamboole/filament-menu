@@ -26,7 +26,7 @@ class MenuForm
                     ->maxLength(255)
                     ->live(onBlur: true)
                     ->afterStateUpdated(function (?string $state, Set $set, ?Menu $record): void {
-                        if ($record !== null || $state === null) {
+                        if ($record instanceof Menu || $state === null) {
                             return;
                         }
 

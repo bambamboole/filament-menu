@@ -11,7 +11,6 @@ class MenuItemFactory extends Factory
 {
     protected $model = MenuItem::class;
 
-    /** @return array{menu_id: Factory<Menu>, label: string, url: string, target: string, sort_order: int} */
     public function definition(): array
     {
         return [

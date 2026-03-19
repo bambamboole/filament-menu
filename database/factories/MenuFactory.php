@@ -10,7 +10,6 @@ class MenuFactory extends Factory
 {
     protected $model = Menu::class;
 
-    /** @return array{name: string, slug: string} */
     public function definition(): array
     {
         return [

@@ -9,7 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $menu_id
+ * @property int|null $parent_id
+ * @property string $label
+ * @property string|null $url
+ * @property string|null $target
+ * @property int $sort_order
+ * @property string|null $linkable_type
+ * @property int|null $linkable_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class MenuItem extends Model
 {
     use HasFactory;
@@ -25,6 +39,7 @@ class MenuItem extends Model
         'linkable_id',
     ];
 
+    #[\Override]
     protected static function booted(): void
     {
         static::saved(fn () => app(FilamentMenu::class)->flush());
@@ -49,7 +64,7 @@ class MenuItem extends Model
         return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order');
     }
 
-    /** @return MorphTo<Model&Linkable, $this> */
+    /** @return MorphTo<Model, $this> */
     public function linkable(): MorphTo
     {
         return $this->morphTo();

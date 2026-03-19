@@ -60,7 +60,7 @@ class FilamentMenuPlugin implements Plugin
 
     public function isAuthorized(): bool
     {
-        if ($this->canAccess === null) {
+        if (!$this->canAccess instanceof Closure) {
             return true;
         }
 

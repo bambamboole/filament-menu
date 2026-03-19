@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 interface Linkable
 {
-    /** @return Builder<static> */
     public static function getLinkableQuery(): Builder;
 
     public static function getNameColumn(): string;
