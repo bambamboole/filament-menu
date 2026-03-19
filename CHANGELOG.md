@@ -2,6 +2,10 @@
 
 All notable changes to `filament-menu` will be documented in this file.
 
+## 0.3.0 - 2026-03-19
+
+**Full Changelog**: https://github.com/bambamboole/filament-menu/compare/0.2.2...0.3.0
+
 ## 0.2.2 - 2026-03-01
 
 **Full Changelog**: https://github.com/bambamboole/filament-menu/compare/0.2.1...0.2.2
