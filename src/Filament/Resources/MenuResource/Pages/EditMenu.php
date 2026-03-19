@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
-
 namespace Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Pages;
 
 use Bambamboole\FilamentMenu\Filament\Resources\MenuResource;
 use Bambamboole\FilamentMenu\FilamentMenu;
+use Bambamboole\FilamentMenu\Models\Menu;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Hidden;
@@ -15,11 +15,12 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 
 /**
- * @property \Bambamboole\FilamentMenu\Models\Menu $record
+ * @property Menu $record
  */
 class EditMenu extends EditRecord
 {
@@ -69,22 +70,10 @@ class EditMenu extends EditRecord
         return Action::make("addLinkable_{$key}")
             ->label(__('filament-menu::menu.edit.linked.title-add', ['type' => $label]))
             ->schema([
-                Select::make('linkable_id')
-                    ->label(__('filament-menu::menu.edit.linked.record'))
-                    ->searchable()
+                self::makeLinkableSelect($linkable)
                     ->required()
-                    ->getSearchResultsUsing(fn (string $search): array => $linkable::getLinkableQuery()
-                        ->where($linkable::getNameColumn(), 'like', "%{$search}%")
-                        ->pluck($linkable::getNameColumn(), 'id')
-                        ->all())
-                    ->getOptionLabelUsing(function ($value) use ($linkable): ?string {
-                        $record = $linkable::find($value);
-
-                        return $record?->{$linkable::getNameColumn()};
-                    })
-                    ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'))
                     ->live()
-                    ->afterStateUpdated(function (?int $state, callable $set) use ($linkable): void {
+                    ->afterStateUpdated(function (?int $state, Set $set) use ($linkable): void {
                         if ($state === null) {
                             return;
                         }
@@ -190,20 +179,8 @@ class EditMenu extends EditRecord
                 Hidden::make('linkable_type'),
 
                 ...array_map(
-                    fn (string $linkable): Select => Select::make('linkable_id')
-                        ->label(__('filament-menu::menu.edit.linked.record'))
-                        ->searchable()
+                    fn (string $linkable): Select => self::makeLinkableSelect($linkable)
                         ->preload()
-                        ->getSearchResultsUsing(fn (string $search): array => $linkable::getLinkableQuery()
-                            ->where($linkable::getNameColumn(), 'like', "%{$search}%")
-                            ->pluck($linkable::getNameColumn(), 'id')
-                            ->all())
-                        ->getOptionLabelUsing(function ($value) use ($linkable): ?string {
-                            $record = $linkable::find($value);
-
-                            return $record?->{$linkable::getNameColumn()};
-                        })
-                        ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'))
                         ->visible(fn (Get $get): bool => $get('item_type') === 'linkable' && $get('linkable_type') === $linkable),
                     $linkables
                 ),
@@ -271,6 +248,23 @@ class EditMenu extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    private static function makeLinkableSelect(string $linkable): Select
+    {
+        return Select::make('linkable_id')
+            ->label(__('filament-menu::menu.edit.linked.record'))
+            ->searchable()
+            ->getSearchResultsUsing(fn (string $search): array => $linkable::getLinkableQuery()
+                ->where($linkable::getNameColumn(), 'like', "%{$search}%")
+                ->pluck($linkable::getNameColumn(), 'id')
+                ->all())
+            ->getOptionLabelUsing(function ($value) use ($linkable): ?string {
+                $record = $linkable::find($value);
+
+                return $record?->{$linkable::getNameColumn()};
+            })
+            ->options($linkable::latest()->limit(10)->pluck($linkable::getNameColumn(), 'id'));
     }
 
     private static function linkableKey(string $class): string

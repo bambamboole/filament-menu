@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace Bambamboole\FilamentMenu\Database\Factories;
 
 use Bambamboole\FilamentMenu\Models\Menu;
@@ -12,7 +11,7 @@ class MenuItemFactory extends Factory
 {
     protected $model = MenuItem::class;
 
-    /** @return array{menu_id: int, label: string, url: string, target: string, sort_order: int} */
+    /** @return array{menu_id: Factory<Menu>, label: string, url: string, target: string, sort_order: int} */
     public function definition(): array
     {
         return [

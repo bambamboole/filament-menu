@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace Bambamboole\FilamentMenu\Contracts;
 
 use Illuminate\Database\Eloquent\Builder;

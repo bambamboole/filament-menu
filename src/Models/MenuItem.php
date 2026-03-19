@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace Bambamboole\FilamentMenu\Models;
 
 use Bambamboole\FilamentMenu\Contracts\Linkable;
@@ -15,12 +14,6 @@ class MenuItem extends Model
 {
     use HasFactory;
 
-    protected static function booted(): void
-    {
-        static::saved(fn () => app(FilamentMenu::class)->flush());
-        static::deleted(fn () => app(FilamentMenu::class)->flush());
-    }
-
     protected $fillable = [
         'menu_id',
         'parent_id',
@@ -31,6 +24,12 @@ class MenuItem extends Model
         'linkable_type',
         'linkable_id',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => app(FilamentMenu::class)->flush());
+        static::deleted(fn () => app(FilamentMenu::class)->flush());
+    }
 
     /** @return BelongsTo<Menu, $this> */
     public function menu(): BelongsTo

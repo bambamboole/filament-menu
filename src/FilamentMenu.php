@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace Bambamboole\FilamentMenu;
 
 use Bambamboole\FilamentMenu\Contracts\Linkable;
@@ -95,9 +94,10 @@ class FilamentMenu
 
     public function flush(): void
     {
+        $keys = Cache::get('filament-menu:all-keys', []);
         Cache::forget('filament-menu:all-keys');
 
-        foreach (Cache::get('filament-menu:all-keys', []) as $key) {
+        foreach ($keys as $key) {
             Cache::forget($key);
         }
     }

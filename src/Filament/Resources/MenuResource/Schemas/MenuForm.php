@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
-
 namespace Bambamboole\FilamentMenu\Filament\Resources\MenuResource\Schemas;
 
 use Bambamboole\FilamentMenu\FilamentMenu;
 use Bambamboole\FilamentMenu\Models\Menu;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -25,7 +25,7 @@ class MenuForm
                     ->required()
                     ->maxLength(255)
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function (?string $state, callable $set, ?Menu $record): void {
+                    ->afterStateUpdated(function (?string $state, Set $set, ?Menu $record): void {
                         if ($record !== null || $state === null) {
                             return;
                         }

@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 namespace Bambamboole\FilamentMenu\Models;
 
 use Bambamboole\FilamentMenu\FilamentMenu;
@@ -88,30 +87,21 @@ class Menu extends Model
      */
     public function getTree(): array
     {
-        $items = $this->items()->with('linkable')->get();
-        $grouped = $items->groupBy(fn (MenuItem $item): int => $item->parent_id ?? 0);
-
-        return $this->buildTree($grouped, 0);
+        return $this->treeToArray($this->getTreeItems());
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, \Illuminate\Support\Collection<int, MenuItem>>  $grouped
+     * @param  Collection<int, MenuItem>|\Illuminate\Support\Collection<int, MenuItem>  $items
      * @return array<int, array{id: int, label: string, url: ?string, target: ?string, children: array<int, mixed>}>
      */
-    private function buildTree($grouped, int $parentId): array
+    private function treeToArray(\Illuminate\Support\Collection $items): array
     {
-        $branch = [];
-
-        foreach ($grouped->get($parentId, collect()) as $item) {
-            $branch[] = [
-                'id' => $item->id,
-                'label' => $item->label,
-                'url' => $item->getUrl(),
-                'target' => $item->target,
-                'children' => $this->buildTree($grouped, $item->id),
-            ];
-        }
-
-        return $branch;
+        return $items->map(fn (MenuItem $item): array => [
+            'id' => $item->id,
+            'label' => $item->label,
+            'url' => $item->getUrl(),
+            'target' => $item->target,
+            'children' => $this->treeToArray($item->children),
+        ])->all();
     }
 }

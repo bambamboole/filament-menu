@@ -50,13 +50,35 @@
         }
     },
     "scripts": {
-        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
-        "analyse": "phpstan analyse",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare",
+            "@php ./vendor/bin/testbench package:discover --ansi"
+        ],
         "lint": "pint",
-        "refactor": "rector",
+        "rector": "rector",
         "test": "pest",
         "test:lint": "pint --test",
-        "test:refactor": "rector --dry-run"
+        "phpstan": "./vendor/bin/phpstan analyse",
+        "phpstan:baseline": "vendor/bin/phpstan analyse --generate-baseline",
+        "clear": [
+            "rm -rf vendor/orchestra/testbench-core/laravel/database/migrations",
+            "rm -rf vendor/orchestra/testbench-core/laravel/database/database.sqlite",
+            "@php vendor/bin/testbench package:purge-skeleton --ansi"
+        ],
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "all": [
+            "@rector",
+            "@phpstan",
+            "@lint",
+            "@test"
+        ]
     },
     "extra": {
         "laravel": {
